@@ -105,6 +105,24 @@ export const zh = {
   "captions.auto_detect": "自动检测",
   "captions.no_captions": "暂无字幕",
 
+  // ===== AI 视频生成 =====
+  "ai_video.title": "AI 视频",
+  "ai_video.prompt_label": "视频描述",
+  "ai_video.prompt_placeholder": "描述你想生成的视频内容，越详细效果越好...",
+  "ai_video.duration": "时长（秒）",
+  "ai_video.resolution": "分辨率",
+  "ai_video.aspect_ratio": "画面比例",
+  "ai_video.generate": "生成视频",
+  "ai_video.generating": "生成中...",
+  "ai_video.success": "视频生成成功，已加入素材库",
+  "ai_video.failed": "视频生成失败",
+  "ai_video.downloading": "下载视频中...",
+  "ai_video.hint": "基于字节跳动 Seedance 2.0 模型，优先通过 Atlas Cloud 调用。720p 约 $0.10/秒，5 秒约 $0.50。失败时自动切换 WaveSpeedAI。",
+  "ai_video.provider_atlas": "Atlas Cloud",
+  "ai_video.provider_wavespeed": "WaveSpeedAI",
+  "ai_video.no_prompt": "请输入视频描述",
+  "ai_video.no_project": "请先打开或创建一个项目",
+
   // ===== 通用 =====
   "common.loading": "加载中...",
   "common.coming_soon": "即将推出...",

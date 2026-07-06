@@ -11,6 +11,7 @@ import { SoundsView } from "@/sounds/components/assets-view";
 import { StickersView } from "@/stickers/components/assets-view";
 import { TextView } from "@/text/components/assets-view";
 import { EffectsView } from "@/effects/components/assets-view";
+import { AIVideoView } from "./views/ai-video";
 
 export function AssetsPanel() {
 	const { activeTab } = useAssetsPanelStore();
@@ -32,6 +33,7 @@ export function AssetsPanel() {
 				{zh["common.coming_soon"]}
 			</div>
 		),
+		"ai-video": <AIVideoView />,
 		settings: <SettingsView />,
 	};
 

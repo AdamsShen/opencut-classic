@@ -11,7 +11,7 @@ import {
 	TextIcon,
 	Settings01Icon,
 	SlidersHorizontalIcon,
-	ColorsIcon,
+	Video02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { zh } from "@/locale/zh";
@@ -25,6 +25,7 @@ export const TAB_KEYS = [
 	"transitions",
 	"captions",
 	"adjustment",
+	"ai-video",
 	"settings",
 ] as const;
 
@@ -68,6 +69,10 @@ export const tabs = {
 	adjustment: {
 		icon: createHugeiconsIcon({ icon: SlidersHorizontalIcon }),
 		label: zh["tab.adjustment"],
+	},
+	"ai-video": {
+		icon: createHugeiconsIcon({ icon: Video02Icon }),
+		label: zh["tab.ai_video"],
 	},
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),
