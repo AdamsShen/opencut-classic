@@ -3,10 +3,10 @@
 /**
  * AI 视频生成服务
  *
- * 主：Atlas Cloud API 调用 Seedance 2.0
- * 备：WaveSpeedAI API 作为 fallback
+ * Atlas Cloud → WaveSpeedAI → fal.ai
+ * 三个 API 都是异步模式：提交任务 → 轮询状态 → 获取视频 URL
  *
- * 两个 API 都是异步模式：提交任务 → 轮询状态 → 获取视频 URL
+ * 优先级: Atlas Cloud (主) → WaveSpeedAI (二) → fal.ai (兜底)
  */
 
 export interface VideoGenOptions {
