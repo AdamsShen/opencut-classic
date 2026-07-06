@@ -153,15 +153,16 @@ export async function generateAudio(
 
   try {
     const isMusic = mode === "music";
+    const durationSeconds = Math.min(Math.max(duration, 3), 30);
     const fullPrompt = isMusic
-      ? `A ${Math.max(duration, 5)}-second music track: ${prompt}. High quality.`
-      : `A ${Math.max(duration, 3)}-second sound effect of ${prompt}. High quality, detailed.`;
+      ? `${durationSeconds}-second music piece: ${prompt}. High quality, instrumental.`
+      : `${durationSeconds}-second sound effect of ${prompt}. High quality, detailed.`;
 
     const audioUrl = await submitAndPoll({
       endpoint: "fal-ai/musicgen",
       input: {
         prompt: fullPrompt,
-        duration: Math.min(duration, 30),
+        duration: durationSeconds,
       },
       onProgress,
     });
