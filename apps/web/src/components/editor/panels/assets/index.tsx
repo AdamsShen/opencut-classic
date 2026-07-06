@@ -37,6 +37,7 @@ export function AssetsPanel() {
 		),
 		"ai-video": <AIVideoView />,
 		"ai-tools": <AIToolsView />,
+		"ai-audio": <AIAudioView />,
 		settings: <SettingsView />,
 	};
 
