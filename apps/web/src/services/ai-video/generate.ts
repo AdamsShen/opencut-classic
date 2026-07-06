@@ -157,7 +157,9 @@ async function wavespeedPoll(requestId: string): Promise<{ status: string; outpu
     throw new Error(`WaveSpeedAI 轮询失败 (${res.status})`);
   }
 
-  return res.json();
+  // WaveSpeedAI 返回 { code, data: { status, outputs, ... } }
+  const json = await res.json();
+  return json.data || json;
 }
 
 async function callWaveSpeedAI(options: VideoGenOptions): Promise<VideoGenResult> {
@@ -166,7 +168,7 @@ async function callWaveSpeedAI(options: VideoGenOptions): Promise<VideoGenResult
   const requestId = await wavespeedGenerate(options.prompt, {
     prompt: options.prompt,
     duration: options.duration ?? 5,
-    resolution: options.resolution ?? "720p",
+    resolution: options.resolution === "480p" ? "720p" : (options.resolution ?? "720p"),
     aspect_ratio: options.aspectRatio ?? "16:9",
     generate_audio: options.generateAudio ?? false,
   });

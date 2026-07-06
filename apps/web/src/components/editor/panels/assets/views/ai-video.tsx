@@ -15,7 +15,6 @@ type AspectRatio = "16:9" | "9:16" | "4:3" | "3:4" | "1:1" | "21:9" | "adaptive"
 
 const DURATIONS: Duration[] = [4, 5, 8, 10, 12, 15];
 const RESOLUTIONS: { value: Resolution; label: string; price: string }[] = [
-  { value: "480p", label: "480p", price: "~$0.05/s" },
   { value: "720p", label: "720p", price: "~$0.10/s" },
   { value: "1080p", label: "1080p", price: "~$0.25/s" },
 ];
