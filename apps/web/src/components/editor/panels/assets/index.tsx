@@ -13,6 +13,7 @@ import { TextView } from "@/text/components/assets-view";
 import { EffectsView } from "@/effects/components/assets-view";
 import { AIVideoView } from "./views/ai-video";
 import { AIToolsView } from "./views/ai-tools";
+import { AIAudioView } from "./views/ai-audio";
 
 export function AssetsPanel() {
 	const { activeTab } = useAssetsPanelStore();

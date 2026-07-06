@@ -140,6 +140,23 @@ export const zh = {
   "ai_video.no_prompt": "请输入视频描述",
   "ai_video.no_project": "请先打开或创建一个项目",
 
+  // ===== AI 音频 =====
+  "ai_audio.title": "AI 音频",
+  "ai_audio.music": "音乐",
+  "ai_audio.soundfx": "音效",
+  "ai_audio.music_desc": "生成背景音乐，根据描述创作旋律和编曲",
+  "ai_audio.soundfx_desc": "生成音效，如环境音、转场音、按钮音等",
+  "ai_audio.prompt_label": "音频描述",
+  "ai_audio.prompt_placeholder": "描述你想要的音乐或音效，例如：轻松的钢琴背景音乐、爆炸音效...",
+  "ai_audio.duration": "时长（秒）",
+  "ai_audio.generate": "生成音频",
+  "ai_audio.processing": "生成中...",
+  "ai_audio.success": "音频生成成功，已加入素材库",
+  "ai_audio.failed": "音频生成失败",
+  "ai_audio.hint": "通过 fal.ai MusicGen 模型生成音频。音乐约 20-30 秒，音效约 5-10 秒。最长 30 秒。",
+  "ai_audio.no_prompt": "请输入音频描述",
+  "ai_audio.no_project": "请先打开或创建一个项目",
+
   // ===== AI 工具 =====
   "ai_tools.title": "AI 工具",
   "ai_tools.remove_bg": "AI 抠像",

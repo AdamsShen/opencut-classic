@@ -8,6 +8,7 @@ import {
 	Happy01Icon,
 	HeadphonesIcon,
 	MagicWand05Icon,
+	MusicNote01Icon,
 	TextIcon,
 	Settings01Icon,
 	SlidersHorizontalIcon,
@@ -27,6 +28,7 @@ export const TAB_KEYS = [
 	"adjustment",
 	"ai-video",
 	"ai-tools",
+	"ai-audio",
 	"settings",
 ] as const;
 
