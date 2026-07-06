@@ -9,11 +9,11 @@ import { useEditor } from "@/editor/use-editor";
 import { zh } from "@/locale/zh";
 import { generateVideo, type VideoGenResult } from "@/services/ai-video/generate";
 
-type Duration = 4 | 5 | 8 | 10 | 12 | 15;
+type Duration = 4 | 5 | 8 | 10 | 12 | 15 | "auto";
 type Resolution = "480p" | "720p" | "1080p";
 type AspectRatio = "16:9" | "9:16" | "4:3" | "3:4" | "1:1" | "21:9" | "adaptive";
 
-const DURATIONS: Duration[] = [4, 5, 8, 10, 12, 15];
+const DURATIONS: Duration[] = [4, 5, 8, 10, 12, 15, "auto"];
 const RESOLUTIONS: { value: Resolution; label: string; price: string }[] = [
   { value: "720p", label: "720p", price: "~$0.10/s" },
   { value: "1080p", label: "1080p", price: "~$0.25/s" },
@@ -33,7 +33,7 @@ export function AIVideoView() {
   const activeProject = useEditor((e) => e.project.getActive());
 
   const [prompt, setPrompt] = useState("");
-  const [duration, setDuration] = useState<Duration>(5);
+  const [duration, setDuration] = useState<Duration>("auto");
   const [resolution, setResolution] = useState<Resolution>("720p");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
   const [generateAudio, setGenerateAudio] = useState(false);
@@ -131,13 +131,13 @@ export function AIVideoView() {
           <Label>{zh["ai_video.duration"]}</Label>
           <select
             value={duration}
-            onChange={(e) => setDuration(Number(e.target.value) as Duration)}
+            onChange={(e) => setDuration(e.target.value === "auto" ? "auto" : Number(e.target.value) as Duration)}
             className={selectClasses}
             disabled={isGenerating}
           >
             {DURATIONS.map((d) => (
-              <option key={d} value={d}>
-                {d} 秒
+              <option key={String(d)} value={String(d)}>
+                {d === "auto" ? "自动（模型决定）" : `${d} 秒`}
               </option>
             ))}
           </select>

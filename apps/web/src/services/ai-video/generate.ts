@@ -11,7 +11,7 @@
 
 export interface VideoGenOptions {
   prompt: string;
-  duration?: number; // 4-15 秒
+  duration?: number | "auto"; // 4-15 秒，或 "auto" 让模型按 prompt 自行决定
   resolution?: "480p" | "720p" | "1080p";
   aspectRatio?: "16:9" | "9:16" | "4:3" | "3:4" | "1:1" | "21:9" | "adaptive";
   generateAudio?: boolean;
@@ -82,9 +82,9 @@ async function callAtlasCloud(options: VideoGenOptions): Promise<VideoGenResult>
   const predictionId = await atlasGenerate(options.prompt, {
     model: "bytedance/seedance-2.0/text-to-video",
     prompt: options.prompt,
-    duration: options.duration ?? 5,
+    duration: options.duration ?? "auto",
     resolution: options.resolution ?? "720p",
-    ratio: options.aspectRatio ?? "adaptive",
+    ratio: options.aspectRatio ?? "16:9",
     generate_audio: options.generateAudio ?? false,
     watermark: false,
   });
@@ -169,7 +169,7 @@ async function callWaveSpeedAI(options: VideoGenOptions): Promise<VideoGenResult
 
   const requestId = await wavespeedGenerate(options.prompt, {
     prompt: options.prompt,
-    duration: options.duration ?? 5,
+    duration: options.duration ?? "auto",
     resolution: options.resolution === "480p" ? "720p" : (options.resolution ?? "720p"),
     aspect_ratio: options.aspectRatio ?? "16:9",
     generate_audio: options.generateAudio ?? false,
@@ -249,7 +249,7 @@ async function callFalAI(options: VideoGenOptions): Promise<VideoGenResult> {
 
   const statusUrl = await falGenerate({
     prompt: options.prompt,
-    duration: options.duration ?? 5,
+    duration: options.duration ?? "auto",
     resolution: options.resolution ?? "720p",
   });
 
