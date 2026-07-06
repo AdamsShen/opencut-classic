@@ -68,8 +68,12 @@ function TimecodeDisplay() {
 	);
 
 	useEffect(() => {
-		const unsubscribeUpdate = editor.playback.onUpdate(setCurrentTime);
-		const unsubscribeSeek = editor.playback.onSeek(setCurrentTime);
+		const unsubscribeUpdate = editor.playback.onUpdate(
+			(time: MediaTime) => { if (time != null) setCurrentTime(time); },
+		);
+		const unsubscribeSeek = editor.playback.onSeek(
+			(time: MediaTime) => { if (time != null) setCurrentTime(time); },
+		);
 		return () => {
 			unsubscribeUpdate();
 			unsubscribeSeek();

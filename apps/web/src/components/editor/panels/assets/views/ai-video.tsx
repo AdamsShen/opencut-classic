@@ -85,6 +85,7 @@ export function AIVideoView() {
       await editor.media.addMediaAsset({
         projectId: activeProject.metadata.id,
         asset: {
+          name: `AI视频-${Date.now()}`,
           file,
           type: "video",
         },

@@ -26,6 +26,7 @@ export const TAB_KEYS = [
 	"captions",
 	"adjustment",
 	"ai-video",
+	"ai-tools",
 	"settings",
 ] as const;
 
@@ -73,6 +74,10 @@ export const tabs = {
 	"ai-video": {
 		icon: createHugeiconsIcon({ icon: Video02Icon }),
 		label: zh["tab.ai_video"],
+	},
+	"ai-tools": {
+		icon: createHugeiconsIcon({ icon: MagicWand05Icon }),
+		label: zh["tab.ai_tools"],
 	},
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),

@@ -37,7 +37,9 @@ export function EditableTimecode({
 	const [hasError, setHasError] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const enterPressedRef = useRef(false);
-	const formattedTime = formatTimecode({ time, format, rate: fps }) ?? "";
+	const formattedTime =
+		time != null ? (formatTimecode({ time, format, rate: fps }) ?? "") : "--:--:--:--";
+	if (!formattedTime) return null;
 
 	const startEditing = () => {
 		if (disabled) return;

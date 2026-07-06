@@ -158,8 +158,8 @@ export function MediaView() {
 
 			switch (mediaSortBy) {
 				case "name":
-					valueA = a.name.toLowerCase();
-					valueB = b.name.toLowerCase();
+					valueA = (a.name || "").toLowerCase();
+					valueB = (b.name || "").toLowerCase();
 					break;
 				case "type":
 					valueA = a.type;

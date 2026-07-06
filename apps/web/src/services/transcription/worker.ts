@@ -23,6 +23,7 @@ export type WorkerResponse =
 			type: "transcribe-complete";
 			text: string;
 			segments: TranscriptionSegment[];
+			language?: string;
 	  }
 	| { type: "transcribe-error"; error: string }
 	| { type: "cancelled" };
@@ -165,6 +166,7 @@ async function handleTranscribe({
 			type: "transcribe-complete",
 			text: result.text,
 			segments,
+			language: (result as Record<string, unknown>).language as string || "",
 		} satisfies WorkerResponse);
 	} catch (error) {
 		if (cancelled) return;
