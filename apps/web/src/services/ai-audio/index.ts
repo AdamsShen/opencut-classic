@@ -20,12 +20,17 @@ function sleep(ms: number): Promise<void> {
 }
 
 function extractAudioUrl(payload: Record<string, unknown>): string | null {
-  const audio = payload.audio as { url?: string } | undefined;
-  if (audio?.url) return audio.url;
-
-  const audioUrl = payload.audio_url;
+  // fal.ai musicgen 返回 { audio_url: { url: "..." } }
+  const audioUrl =
+    (payload.audio_url as { url?: string })?.url ||
+    payload.audio_url;
   if (typeof audioUrl === "string" && audioUrl.startsWith("http")) return audioUrl;
 
+  // audio 对象
+  const audio = (payload.audio as { url?: string }) || {};
+  if (audio.url && audio.url.startsWith("http")) return audio.url;
+
+  // 通用降级
   const output = payload.output;
   if (typeof output === "string" && output.startsWith("http")) return output;
 
@@ -168,7 +173,8 @@ export async function generateAudio(
     }
     const blob = await response.blob();
     const prefix = isMusic ? "音乐" : "音效";
-    const name = `${prefix}-${prompt.slice(0, 20).replace(/[^\\w\\u4e00-\\u9fff]/g, "_")}-${Date.now()}`;
+    const safeName = prompt.slice(0, 20).replace(/[^\w一-鿿]/g, "_");
+    const name = `${prefix}-${safeName}-${Date.now()}`;
 
     const file = new File([blob], `${name}.mp3`, {
       type: blob.type || "audio/mpeg",
