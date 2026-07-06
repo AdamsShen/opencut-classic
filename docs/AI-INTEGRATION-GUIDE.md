@@ -299,13 +299,24 @@ bun dev:web
 
 ### 第二步：Seedance 2.0 文生视频集成 ✅
 
-**目标**：编辑器内直接输入 prompt，调用 Seedance 2.0 生成视频，自动加入素材库。
+**状态**：已完成实施，代码已推送至 `main` 分支。
 
-**方案**：新增 AI Video 标签页 → `@fal-ai/client` SDK → 结果写入 MediaManager。
+**实际实施**（与原设计有差异）：
+- **API 提供商**：原设计用 `@fal-ai/client`，实际改用 **Atlas Cloud API（主）** + **WaveSpeedAI API（备 fallback）**
+- **不依赖外部 SDK**：直接用 `fetch()` 调用 REST API，无需 `bun add @fal-ai/client`
+- **API Key**：配置在 `.env.local` 中 `NEXT_PUBLIC_WAVESPEED_API_KEY`（及可选的 `NEXT_PUBLIC_ATLAS_API_KEY`）
+- **架构**：`src/services/ai-video/generate.ts` — 异步提交 → 轮询 → 下载 → 写入 MediaManager
+- **UI 组件**：`src/components/editor/panels/assets/views/ai-video.tsx` — 支持 prompt、时长(4-15s)、分辨率(720p/1080p)、画面比例、同步音频
+- **实测验证**：WaveSpeedAI 连通性测试通过，5 秒 720p 视频生成耗时约 2 分钟
 
-**依赖**：fal.ai API Key（免费注册即可获取）
+**相关 commits**：
+```
+1b3dd3df feat: 集成 Seedance 2.0 文生视频功能
+a98f62e5 fix: 修复 WaveSpeedAI 轮询响应解析和分辨率兼容
+6f427400 fix: generate.ts 添加 use client 指令
+```
 
-**改动量**：1-2 天
+**原设计文档（保留作为参考）**：以下内容来自最初的设计方案，实际实施可能有所不同。
 
 #### 实施步骤
 
