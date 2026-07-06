@@ -296,7 +296,7 @@ async function callWaveSpeedAI(options: VideoGenOptions): Promise<VideoGenResult
   throw new Error("WaveSpeedAI 生成超时（超过 5 分钟）");
 }
 
-// ===== fal.ai API (第二选择，已验证可用) =====
+// ===== fal.ai API (优先，已验证可用) =====
 
 const FAL_BASE = "https://queue.fal.run";
 
@@ -400,25 +400,25 @@ export async function generateVideo(options: VideoGenOptions): Promise<VideoGenR
     };
   }
 
-  // 第一选择: Replicate ($0.08/s 最便宜)
-  if (replicateKey) {
-    try {
-      return await callReplicate(options);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "未知错误";
-      console.warn("Replicate 失败，fallback:", msg);
-      options.onProgress?.("Replicate 失败，切换 fal.ai...");
-    }
-  }
-
-  // 第二选择: fal.ai (已验证可用)
+  // 第一选择: fal.ai (已验证可用 ✅)
   if (falKey) {
     try {
       return await callFalAI(options);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "未知错误";
       console.warn("fal.ai 失败，fallback:", msg);
-      options.onProgress?.("fal.ai 失败，切换 WaveSpeedAI...");
+      options.onProgress?.("fal.ai 失败，切换 Replicate...");
+    }
+  }
+
+  // 第二选择: Replicate ($0.08/s 最便宜)
+  if (replicateKey) {
+    try {
+      return await callReplicate(options);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "未知错误";
+      console.warn("Replicate 失败，fallback:", msg);
+      options.onProgress?.("Replicate 失败，切换 WaveSpeedAI...");
     }
   }
 
