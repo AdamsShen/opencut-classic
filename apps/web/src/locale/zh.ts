@@ -134,7 +134,7 @@ export const zh = {
   "ai_video.success": "视频生成成功，已加入素材库",
   "ai_video.failed": "视频生成失败",
   "ai_video.downloading": "下载视频中...",
-  "ai_video.hint": "基于字节跳动 Seedance 2.0 模型，优先通过 Atlas Cloud 调用。720p 约 $0.10/秒，5 秒约 $0.50。失败时自动切换 WaveSpeedAI。",
+  "ai_video.hint": "基于字节跳动 Seedance 2.0 模型。默认为「自动」时长（模型按 prompt 决定），也可手动选 4-15 秒。720p ~$0.10/秒，如 5 秒约 $0.50。",
   "ai_video.provider_atlas": "Atlas Cloud",
   "ai_video.provider_wavespeed": "WaveSpeedAI",
   "ai_video.no_prompt": "请输入视频描述",
