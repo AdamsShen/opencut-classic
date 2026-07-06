@@ -22,101 +22,7 @@ export interface VideoGenResult {
   success: boolean;
   videoUrl?: string;
   error?: string;
-  provider: "atlas" | "wavespeed" | "replicate" | "fal";
-}
-
-// ===== Replicate API =====
-
-const REPLICATE_BASE = "https://api.replicate.com/v1";
-
-async function replicateGenerate(data: Record<string, unknown>): Promise<string> {
-  const apiKey = process.env.NEXT_PUBLIC_REPLICATE_API_KEY || "";
-  const res = await fetch(
-    `${REPLICATE_BASE}/models/bytedance/seedance-2.0/predictions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(data),
-    },
-  );
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Replicate 请求失败 (${res.status}): ${errText}`);
-  }
-
-  const json = await res.json();
-  if (!json.id && !json.urls?.get) {
-    throw new Error(`Replicate 返回异常: ${JSON.stringify(json)}`);
-  }
-
-  // Replicate returns { id, urls: { get } } or { id, urls: { stream } }
-  return json.urls?.get || `${REPLICATE_BASE}/predictions/${json.id}`;
-}
-
-async function replicatePoll(
-  pollUrlOrId: string,
-): Promise<{ status: string; output?: string; error?: string }> {
-  const apiKey = process.env.NEXT_PUBLIC_REPLICATE_API_KEY || "";
-  const url = pollUrlOrId.startsWith("http")
-    ? pollUrlOrId
-    : `${REPLICATE_BASE}/predictions/${pollUrlOrId}`;
-
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${apiKey}` },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Replicate 轮询失败 (${res.status})`);
-  }
-
-  const json = await res.json();
-  return {
-    status: json.status,
-    output: typeof json.output === "string" ? json.output : json.output?.url || json.output?.[0],
-    error: json.error,
-  };
-}
-
-async function callReplicate(options: VideoGenOptions): Promise<VideoGenResult> {
-  options.onProgress?.("Replicate: 提交任务...");
-
-  const pollUrl = await replicateGenerate({
-    input: {
-      prompt: options.prompt,
-      duration: options.duration ?? 5,
-      resolution: options.resolution ?? "720p",
-    },
-  });
-
-  options.onProgress?.("Replicate: 生成中...");
-
-  const maxAttempts = 150;
-  for (let i = 0; i < maxAttempts; i++) {
-    await sleep(2000);
-    const result = await replicatePoll(pollUrl);
-
-    if (result.status === "succeeded" || result.status === "completed") {
-      const videoUrl = result.output;
-      if (!videoUrl) {
-        return { success: false, error: "Replicate 返回了空视频地址", provider: "replicate" };
-      }
-      return { success: true, videoUrl, provider: "replicate" };
-    }
-
-    if (result.status === "failed" || result.status === "canceled") {
-      throw new Error(`Replicate: ${result.error || "生成失败"}`);
-    }
-
-    if (i % 5 === 0) {
-      options.onProgress?.(`Replicate: 生成中... (${Math.round((i / maxAttempts) * 100)}%)`);
-    }
-  }
-
-  throw new Error("Replicate 生成超时（超过 5 分钟）");
+  provider: "atlas" | "wavespeed" | "fal";
 }
 
 // ===== Atlas Cloud API =====
@@ -395,7 +301,7 @@ export async function generateVideo(options: VideoGenOptions): Promise<VideoGenR
     return {
       success: false,
       error: "未配置任何 API Key。请在 .env.local 中配置",
-      provider: "replicate",
+      provider: "atlas",
     };
   }
 
@@ -431,7 +337,7 @@ export async function generateVideo(options: VideoGenOptions): Promise<VideoGenR
     }
   }
 
-  return { success: false, error: "所有提供商均不可用", provider: "replicate" };
+  return { success: false, error: "所有提供商均不可用", provider: "atlas" };
 }
 
 function sleep(ms: number): Promise<void> {
