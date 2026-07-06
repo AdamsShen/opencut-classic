@@ -50,12 +50,16 @@ export function AIAudioView() {
         return;
       }
 
+      const file = result.file!;
+      const url = URL.createObjectURL(file);
+
       await editor.media.addMediaAsset({
         projectId: activeProject.metadata.id,
         asset: {
-          name: result.file!.name,
-          file: result.file!,
+          name: file.name,
+          file,
           type: "audio",
+          url,
         },
       });
 

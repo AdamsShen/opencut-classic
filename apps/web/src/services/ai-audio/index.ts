@@ -155,7 +155,7 @@ export async function generateAudio(
     const isMusic = mode === "music";
     const fullPrompt = isMusic
       ? `${prompt}. High quality music track.`
-      : `${prompt}. Sound effect, short, high quality.`;
+      : `A ${Math.max(duration, 3)}-second sound effect of ${prompt}. High quality, detailed.`;
 
     const audioUrl = await submitAndPoll({
       endpoint: "fal-ai/musicgen",
