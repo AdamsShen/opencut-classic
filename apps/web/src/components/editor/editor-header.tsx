@@ -1,5 +1,6 @@
 "use client";
 
+import { zh } from "@/locale/zh";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
 import {
@@ -79,9 +80,9 @@ function ProjectDropdown() {
 					name: newName.trim(),
 				});
 			} catch (error) {
-				toast.error("Failed to rename project", {
+				toast.error(zh["toast.failed_rename_project"], {
 					description:
-						error instanceof Error ? error.message : "Please try again",
+						error instanceof Error ? error.message : zh["toast.please_try_again"],
 				});
 			} finally {
 				setOpenDialog(null);
@@ -97,9 +98,9 @@ function ProjectDropdown() {
 				});
 				router.push("/projects");
 			} catch (error) {
-				toast.error("Failed to delete project", {
+				toast.error(zh["toast.failed_delete_project"], {
 					description:
-						error instanceof Error ? error.message : "Please try again",
+						error instanceof Error ? error.message : zh["toast.please_try_again"],
 				});
 			} finally {
 				setOpenDialog(null);
@@ -206,9 +207,9 @@ function EditableProjectName() {
 					name: newName,
 				});
 			} catch (error) {
-				toast.error("Failed to rename project", {
+				toast.error(zh["toast.failed_rename_project"], {
 					description:
-						error instanceof Error ? error.message : "Please try again",
+						error instanceof Error ? error.message : zh["toast.please_try_again"],
 				});
 			}
 		}

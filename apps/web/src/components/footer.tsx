@@ -1,3 +1,4 @@
+import { zh } from "@/locale/zh";
 import Link from "next/link";
 import { RiDiscordFill, RiTwitterXLine } from "react-icons/ri";
 import { FaGithub } from "react-icons/fa6";
@@ -17,17 +18,17 @@ type CategoryLinks = Record<Category, FooterLink[]>;
 
 const links: CategoryLinks = {
 	resources: [
-		{ label: "Roadmap", href: "/roadmap" },
-		{ label: "Changelog", href: "/changelog" },
-		{ label: "Blog", href: "/blog" },
-		{ label: "Privacy", href: "/privacy" },
-		{ label: "Terms of use", href: "/terms" },
+		{ label: zh["nav.roadmap"], href: "/roadmap" },
+		{ label: zh["nav.changelog"], href: "/changelog" },
+		{ label: zh["nav.blog"], href: "/blog" },
+		{ label: zh["nav.privacy"], href: "/privacy" },
+		{ label: zh["nav.terms"], href: "/terms" },
 	],
 	company: [
-		{ label: "Contributors", href: "/contributors" },
-		{ label: "Sponsors", href: "/sponsors" },
-		{ label: "Brand", href: "/brand" },
-		{ label: "About", href: `${SOCIAL_LINKS.github}/blob/main/README.md` },
+		{ label: zh["nav.contributors"], href: "/contributors" },
+		{ label: zh["nav.sponsors"], href: "/sponsors" },
+		{ label: zh["nav.brand"], href: "/brand" },
+		{ label: zh["nav.about"], href: `${SOCIAL_LINKS.github}/blob/main/README.md` },
 	],
 };
 
@@ -49,7 +50,7 @@ export function Footer() {
 							<span className="text-lg font-bold">OpenCut</span>
 						</div>
 						<p className="text-muted-foreground mb-5 text-sm md:text-left">
-							The privacy-first video editor that feels simple to use.
+							{zh["footer.tagline"]}
 						</p>
 						<div className="flex justify-start gap-3">
 							<Link

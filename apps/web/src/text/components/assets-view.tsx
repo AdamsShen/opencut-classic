@@ -1,4 +1,5 @@
 import { DraggableItem } from "@/components/editor/panels/assets/draggable-item";
+import { zh } from "@/locale/zh";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import { useEditor } from "@/editor/use-editor";
 import { DEFAULTS } from "@/timeline/defaults";
@@ -24,7 +25,7 @@ export function TextView() {
 	};
 
 	return (
-		<PanelView title="Text">
+		<PanelView title={zh["tab.text"]}>
 			<DraggableItem
 				name="Default text"
 				preview={

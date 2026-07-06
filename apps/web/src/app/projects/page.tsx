@@ -1,5 +1,6 @@
 "use client";
 
+import { zh } from "@/locale/zh";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -331,7 +332,7 @@ function SearchBar({
 						aria-hidden="true"
 					/>
 					<Input
-						placeholder="Search..."
+						placeholder={zh["common.search"]}
 						value={searchQuery}
 						onChange={(event) => setSearchQuery({ query: event.target.value })}
 						size="lg"
@@ -346,13 +347,13 @@ function SearchBar({
 const PROJECT_ACTIONS = [
 	{
 		id: "duplicate",
-		label: "Duplicate",
+		label: zh["common.duplicate"],
 		icon: Copy01Icon,
 		variant: "outline" as const,
 	},
 	{
 		id: "delete",
-		label: "Delete",
+		label: zh["common.delete"],
 		icon: Delete02Icon,
 		variant: "destructive-foreground" as const,
 	},
@@ -510,7 +511,7 @@ function NewProjectButton() {
 
 	const handleCreateProject = async () => {
 		const projectId = await editor.project.createNewProject({
-			name: "New project",
+			name: zh["common.new_project"],
 		});
 		router.push(`/editor/${projectId}`);
 	};
@@ -521,8 +522,8 @@ function NewProjectButton() {
 			className="flex px-5 md:px-6"
 			onClick={handleCreateProject}
 		>
-			<span className="text-sm font-medium hidden md:block">New project</span>
-			<span className="text-sm font-medium block md:hidden">New</span>
+			<span className="text-sm font-medium hidden md:block">{zh["common.new_project"]}</span>
+			<span className="text-sm font-medium block md:hidden">{zh["common.new"]}</span>
 		</Button>
 	);
 }
@@ -956,7 +957,7 @@ function EmptyState() {
 	const handleCreateProject = async () => {
 		try {
 			const projectId = await editor.project.createNewProject({
-				name: "New project",
+				name: zh["common.new_project"],
 			});
 			router.push(`/editor/${projectId}`);
 		} catch (error) {

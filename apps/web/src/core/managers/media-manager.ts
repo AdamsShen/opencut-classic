@@ -1,3 +1,4 @@
+import { zh } from "@/locale/zh";
 import type { EditorCore } from "@/core";
 import { toast } from "sonner";
 import type { MediaAsset } from "@/media/types";
@@ -41,7 +42,7 @@ export class MediaManager {
 			this.notify();
 
 			if (storageService.isQuotaExceededError({ error })) {
-				toast.error("Not enough browser storage", {
+				toast.error(zh["toast.not_enough_storage"], {
 					description: error instanceof Error ? error.message : undefined,
 				});
 			}

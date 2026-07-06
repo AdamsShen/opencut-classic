@@ -1,5 +1,6 @@
 "use client";
 
+import { zh } from "@/locale/zh";
 import { useState } from "react";
 import { TransitionTopIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -80,7 +81,7 @@ export function ExportButton() {
 				>
 					<div className="relative flex items-center gap-1.5 rounded-[0.6rem] bg-linear-270 from-[#2567EC] to-[#37B6F7] px-4 py-1 shadow-[0_1px_3px_0px_rgba(0,0,0,0.65)]">
 						<HugeiconsIcon icon={TransitionTopIcon} className="z-50 size-3.5" />
-						<span className="z-50 text-[0.875rem]">Export</span>
+						<span className="z-50 text-[0.875rem]">{zh["export.export"]}</span>
 						<div className="absolute top-0 left-0 z-10 flex size-full items-center justify-center rounded-[0.6rem] bg-linear-to-t from-white/0 to-white/50">
 							<div className="absolute top-[0.08rem] z-50 h-[calc(100%-2px)] w-[calc(100%-2px)] rounded-[0.6rem] bg-linear-270 from-[#2567EC] to-[#37B6F7]"></div>
 						</div>
@@ -148,14 +149,14 @@ function ExportPopover({
 		<PopoverContent className="bg-background mr-4 flex w-80 flex-col p-0">
 			{exportResult && !exportResult.success ? (
 				<ExportError
-					error={exportResult.error || "Unknown error occurred"}
+					error={exportResult.error || zh["export.unknown_error"]}
 					onRetry={handleExport}
 				/>
 			) : (
 				<>
 					<div className="flex items-center justify-between p-3 border-b">
 						<h3 className="font-medium text-sm">
-							{isExporting ? "Exporting project" : "Export project"}
+							{isExporting ? zh["export.exporting_project"] : zh["export.export_project"]}
 						</h3>
 					</div>
 
@@ -169,7 +170,7 @@ function ExportPopover({
 										showTopBorder={false}
 									>
 										<SectionHeader>
-											<SectionTitle>Format</SectionTitle>
+											<SectionTitle>{zh["export.format"]}</SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<RadioGroup
@@ -198,7 +199,7 @@ function ExportPopover({
 
 									<Section collapsible defaultOpen={false}>
 										<SectionHeader>
-											<SectionTitle>Quality</SectionTitle>
+											<SectionTitle>{zh["export.quality"]}</SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<RadioGroup
@@ -211,15 +212,15 @@ function ExportPopover({
 											>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="low" id="low" />
-													<Label htmlFor="low">Low - Smallest file size</Label>
+													<Label htmlFor="low">{zh["export.quality.low"]}</Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="medium" id="medium" />
-													<Label htmlFor="medium">Medium - Balanced</Label>
+													<Label htmlFor="medium">{zh["export.quality.medium"]}</Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="high" id="high" />
-													<Label htmlFor="high">High - Recommended</Label>
+													<Label htmlFor="high">{zh["export.quality.high"]}</Label>
 												</div>
 												<div className="flex items-center space-x-2">
 													<RadioGroupItem value="very_high" id="very_high" />
@@ -233,7 +234,7 @@ function ExportPopover({
 
 									<Section collapsible defaultOpen={false}>
 										<SectionHeader>
-											<SectionTitle>Audio</SectionTitle>
+											<SectionTitle>{zh["export.audio"]}</SectionTitle>
 										</SectionHeader>
 										<SectionContent>
 											<div className="flex items-center space-x-2">

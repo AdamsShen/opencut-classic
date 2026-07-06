@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
@@ -55,7 +56,7 @@ export function StickersView() {
 				<Input
 					size="sm"
 					variant="default"
-					placeholder="Search..."
+					placeholder={zh["common.search"]}
 					value={searchQuery}
 					onChange={(e) => {
 						setSearchQuery({ query: e.target.value });
@@ -79,7 +80,7 @@ export function StickersView() {
 				variant="underline"
 				className="mt-2 flex min-h-0 flex-1 flex-col"
 			>
-				<TabsList aria-label="Sticker categories">
+				<TabsList aria-label={zh["media.categories"]}>
 					{Object.entries(STICKER_CATEGORIES).map(([key, label]) => (
 						<TabsTrigger key={key} value={key}>
 							{label}

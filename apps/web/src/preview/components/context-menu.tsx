@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import {
 	ContextMenuCheckboxItem,
@@ -32,8 +33,8 @@ export function PreviewContextMenu({
 		const result = await editor.renderer.copySnapshot();
 
 		if (!result.success) {
-			toast.error("Failed to copy snapshot", {
-				description: result.error ?? "Please try again",
+			toast.error(zh["toast.failed_copy_snapshot"], {
+				description: result.error ?? zh["toast.please_try_again"],
 			});
 			return;
 		}
@@ -43,8 +44,8 @@ export function PreviewContextMenu({
 		const result = await editor.renderer.saveSnapshot();
 
 		if (!result.success) {
-			toast.error("Failed to save snapshot", {
-				description: result.error ?? "Please try again",
+			toast.error(zh["toast.failed_save_snapshot"], {
+				description: result.error ?? zh["toast.please_try_again"],
 			});
 			return;
 		}

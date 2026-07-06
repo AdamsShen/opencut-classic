@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -318,7 +319,7 @@ function MediaItemWithContextMenu({
 	const { isSelected, selectedIds } = useSelection();
 	const idsToDelete = isSelected(item.id) ? selectedIds : [item.id];
 	const deleteLabel =
-		idsToDelete.length > 1 ? `Delete ${idsToDelete.length} items` : "Delete";
+		idsToDelete.length > 1 ? `Delete ${idsToDelete.length} items` : zh["common.delete"];
 
 	return (
 		<ContextMenu>
@@ -482,7 +483,7 @@ function MediaPreview({
 		return (
 			<MediaTypePlaceholder
 				icon={Video01Icon}
-				label="Video"
+				label={zh["media.video"]}
 				duration={item.duration}
 				variant="muted"
 			/>
@@ -493,7 +494,7 @@ function MediaPreview({
 		return (
 			<MediaTypePlaceholder
 				icon={MusicNote03Icon}
-				label="Audio"
+				label={zh["media.audio"]}
 				duration={item.duration}
 				variant="bordered"
 			/>
@@ -567,21 +568,21 @@ function MediaActions({
 						</TooltipTrigger>
 						<DropdownMenuContent align="end">
 							<SortMenuItem
-								label="Name"
+								label={zh["media.name"]}
 								sortKey="name"
 								currentSortBy={sortBy}
 								currentSortOrder={sortOrder}
 								onSort={onSort}
 							/>
 							<SortMenuItem
-								label="Type"
+								label={zh["media.type"]}
 								sortKey="type"
 								currentSortBy={sortBy}
 								currentSortOrder={sortOrder}
 								onSort={onSort}
 							/>
 							<SortMenuItem
-								label="Duration"
+								label={zh["media.duration"]}
 								sortKey="duration"
 								currentSortBy={sortBy}
 								currentSortOrder={sortOrder}

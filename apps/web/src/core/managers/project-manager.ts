@@ -1,3 +1,4 @@
+import { zh } from "@/locale/zh";
 import type { EditorCore } from "@/core";
 import type {
 	TProject,
@@ -120,7 +121,7 @@ export class ProjectManager {
 
 			return newProject.metadata.id;
 		} catch (error) {
-			toast.error("Failed to save new project");
+			toast.error(zh["toast.failed_save_project"]);
 			throw error;
 		}
 	}
@@ -325,8 +326,8 @@ export class ProjectManager {
 		try {
 			const result = await storageService.loadProject({ id });
 			if (!result) {
-				toast.error("Project not found", {
-					description: "Please try again",
+				toast.error(zh["toast.project_not_found"], {
+					description: zh["toast.please_try_again"],
 				});
 				return;
 			}
@@ -350,9 +351,9 @@ export class ProjectManager {
 			this.updateMetadata(updatedProject);
 		} catch (error) {
 			console.error("Failed to rename project:", error);
-			toast.error("Failed to rename project", {
+			toast.error(zh["toast.failed_rename_project"], {
 				description:
-					error instanceof Error ? error.message : "Please try again",
+					error instanceof Error ? error.message : zh["toast.please_try_again"],
 			});
 		}
 	}
@@ -388,7 +389,7 @@ export class ProjectManager {
 					{
 						description:
 							missingProjectIds.length === 1
-								? "Please try again"
+								? zh["toast.please_try_again"]
 								: "Some projects could not be found",
 					},
 				);
@@ -475,9 +476,9 @@ export class ProjectManager {
 			return duplicationPlans.map((plan) => plan.newProjectId);
 		} catch (error) {
 			console.error("Failed to duplicate projects:", error);
-			toast.error("Failed to duplicate projects", {
+			toast.error(zh["toast.failed_duplicate_projects"], {
 				description:
-					error instanceof Error ? error.message : "Please try again",
+					error instanceof Error ? error.message : zh["toast.please_try_again"],
 			});
 			throw error;
 		}

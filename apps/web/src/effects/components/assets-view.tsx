@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import { useEffect, useRef, useCallback } from "react";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
@@ -13,7 +14,7 @@ export function EffectsView() {
 	const effects = effectsRegistry.getAll();
 
 	return (
-		<PanelView title="Effects">
+		<PanelView title={zh["tab.effects"]}>
 			<EffectsGrid effects={effects} />
 		</PanelView>
 	);

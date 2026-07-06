@@ -14,6 +14,7 @@ import {
 	ColorsIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { zh } from "@/locale/zh";
 
 export const TAB_KEYS = [
 	"media",
@@ -38,39 +39,39 @@ const createHugeiconsIcon =
 export const tabs = {
 	media: {
 		icon: createHugeiconsIcon({ icon: Folder03Icon }),
-		label: "Media",
+		label: zh["tab.media"],
 	},
 	sounds: {
 		icon: createHugeiconsIcon({ icon: HeadphonesIcon }),
-		label: "Sounds",
+		label: zh["tab.sounds"],
 	},
 	text: {
 		icon: createHugeiconsIcon({ icon: TextIcon }),
-		label: "Text",
+		label: zh["tab.text"],
 	},
 	stickers: {
 		icon: createHugeiconsIcon({ icon: Happy01Icon }),
-		label: "Stickers",
+		label: zh["tab.stickers"],
 	},
 	effects: {
 		icon: createHugeiconsIcon({ icon: MagicWand05Icon }),
-		label: "Effects",
+		label: zh["tab.effects"],
 	},
 	transitions: {
 		icon: createHugeiconsIcon({ icon: ArrowRightDoubleIcon }),
-		label: "Transitions",
+		label: zh["tab.transitions"],
 	},
 	captions: {
 		icon: createHugeiconsIcon({ icon: ClosedCaptionIcon }),
-		label: "Captions",
+		label: zh["tab.captions"],
 	},
 	adjustment: {
 		icon: createHugeiconsIcon({ icon: SlidersHorizontalIcon }),
-		label: "Adjustment",
+		label: zh["tab.adjustment"],
 	},
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),
-		label: "Settings",
+		label: zh["tab.settings"],
 	},
 } satisfies Record<
 	Tab,

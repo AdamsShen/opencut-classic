@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import {
 	Sheet,
@@ -71,7 +72,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 
 			const { canDelete, reason } = canDeleteScene({ scene });
 			if (!canDelete) {
-				toast.error(reason || "Failed to delete scene");
+				toast.error(reason || zh["toast.failed_delete_scene"]);
 				continue;
 			}
 
@@ -113,7 +114,7 @@ export function ScenesView({ children }: { children: React.ReactNode }) {
 							onClick={handleSelectMode}
 						>
 							<ListCheck />
-							{isSelectMode ? "Cancel" : "Select"}
+							{isSelectMode ? zh["scene.cancel"] : zh["scene.select"]}
 						</Button>
 						{isSelectMode && (
 							<DeleteDialog

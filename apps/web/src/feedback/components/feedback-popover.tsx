@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -77,7 +78,7 @@ function useFeedback() {
 			setEntries(next);
 			writeHistory({ entries: next });
 			onSuccess();
-			toast.success("Feedback sent");
+			toast.success(zh["toast.feedback_sent"]);
 		} catch (error) {
 			toast.error(
 				error instanceof Error ? error.message : "Failed to send feedback",

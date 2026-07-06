@@ -1,5 +1,6 @@
 "use client";
 
+import { zh } from "@/locale/zh";
 import { Separator } from "@/components/ui/separator";
 import { type Tab, useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 import { TabBar } from "./tabbar";
@@ -22,13 +23,13 @@ export function AssetsPanel() {
 		effects: <EffectsView />,
 		transitions: (
 			<div className="text-muted-foreground p-4">
-				Transitions view coming soon...
+				{zh["common.coming_soon"]}
 			</div>
 		),
 		captions: <Captions />,
 		adjustment: (
 			<div className="text-muted-foreground p-4">
-				Adjustment view coming soon...
+				{zh["common.coming_soon"]}
 			</div>
 		),
 		settings: <SettingsView />,

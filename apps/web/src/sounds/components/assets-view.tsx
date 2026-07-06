@@ -1,4 +1,5 @@
 "use client";
+import { zh } from "@/locale/zh";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -227,7 +228,7 @@ function SoundEffectsView() {
 		<div className="mt-1 flex h-full flex-col gap-5">
 			<div className="flex items-center gap-3">
 				<Input
-					placeholder="Search sound effects"
+					placeholder={zh["media.search"]}
 					className="w-full"
 					containerClassName="w-full"
 					value={searchQuery}
@@ -276,7 +277,7 @@ function SoundEffectsView() {
 							</div>
 						)}
 						{isSearching && searchQuery && (
-							<div className="text-muted-foreground text-sm">Searching...</div>
+							<div className="text-muted-foreground text-sm">{zh["common.loading"]}</div>
 						)}
 						{displayedSounds.map((sound) => (
 							<AudioItem
@@ -537,7 +538,7 @@ function AudioItem({ sound, isPlaying, onPlay }: AudioItemProps) {
 					size="icon"
 					className="text-muted-foreground hover:text-foreground w-auto !opacity-100"
 					onClick={handleAddToTimeline}
-					title="Add to timeline"
+					title={zh["common.add_to_timeline"]}
 				>
 					<HugeiconsIcon icon={PlusSignIcon} />
 				</Button>

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { zh } from "@/locale/zh";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import {
 	Select,
@@ -239,7 +240,7 @@ export function Captions() {
 
 	return (
 		<PanelView
-			title="Captions"
+			title={zh["tab.captions"]}
 			contentClassName="px-0 flex flex-col h-full"
 			actions={
 				<TooltipProvider>
@@ -295,7 +296,7 @@ export function Captions() {
 								onValueChange={(value) => handleLanguageChange({ value })}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select a language" />
+									<SelectValue placeholder={zh["captions.language"]} />
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="auto">Auto detect</SelectItem>

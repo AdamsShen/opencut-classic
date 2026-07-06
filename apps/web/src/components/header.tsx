@@ -1,5 +1,6 @@
 "use client";
 
+import { zh } from "@/locale/zh";
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -31,19 +32,19 @@ export function Header() {
 
 	const links = [
 		{
-			label: "Roadmap",
+			label: zh["nav.roadmap"],
 			href: "/roadmap",
 		},
 		{
-			label: "Contributors",
+			label: zh["nav.contributors"],
 			href: "/contributors",
 		},
 		{
-			label: "Sponsors",
+			label: zh["nav.sponsors"],
 			href: "/sponsors",
 		},
 		{
-			label: "Blog",
+			label: zh["nav.blog"],
 			href: "/blog",
 		},
 	];
@@ -73,7 +74,7 @@ export function Header() {
 								}}
 							>
 								<HugeiconsIcon icon={Copy01Icon} />
-								Copy SVG
+								{zh["menu.copy_svg"]}
 							</ContextMenuItem>
 							<ContextMenuItem
 								onClick={() => {
@@ -84,12 +85,12 @@ export function Header() {
 								}}
 							>
 								<HugeiconsIcon icon={Download01Icon} />
-								Download SVG
+								{zh["menu.download_svg"]}
 							</ContextMenuItem>
 							<Link href="/brand">
 								<ContextMenuItem>
 									<HugeiconsIcon icon={LinkSquare02Icon} />
-									Brand assets
+									{zh["nav.brand_assets"]}
 								</ContextMenuItem>
 							</Link>
 						</ContextMenuContent>
@@ -126,7 +127,7 @@ export function Header() {
 						</Link>
 						<Link href="/projects">
 							<Button className="text-sm">
-								Projects
+								{zh["nav.projects"]}
 								<ArrowRight className="size-4" />
 							</Button>
 						</Link>

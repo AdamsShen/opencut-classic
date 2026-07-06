@@ -1,3 +1,4 @@
+import { zh } from "@/locale/zh";
 import { create } from "zustand";
 import type { SoundEffect, SavedSound } from "@/sounds/types";
 import { storageService } from "@/services/storage/service";
@@ -154,7 +155,7 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 			const errorMessage =
 				error instanceof Error ? error.message : "Failed to save sound";
 			set({ savedSoundsError: errorMessage });
-			toast.error("Failed to save sound");
+			toast.error(zh["toast.failed_save_sound"]);
 			console.error("Failed to save sound:", error);
 		}
 	},
@@ -170,7 +171,7 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 			const errorMessage =
 				error instanceof Error ? error.message : "Failed to remove sound";
 			set({ savedSoundsError: errorMessage });
-			toast.error("Failed to remove sound");
+			toast.error(zh["toast.failed_remove_sound"]);
 			console.error("Failed to remove sound:", error);
 		}
 	},
@@ -201,7 +202,7 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 			const errorMessage =
 				error instanceof Error ? error.message : "Failed to clear saved sounds";
 			set({ savedSoundsError: errorMessage });
-			toast.error("Failed to clear saved sounds");
+			toast.error(zh["toast.failed_clear_sounds"]);
 			console.error("Failed to clear saved sounds:", error);
 		}
 	},
@@ -209,7 +210,7 @@ export const useSoundsStore = create<SoundsStore>((set, get) => ({
 	addSoundToTimeline: async ({ sound }) => {
 		const audioUrl = sound.previewUrl;
 		if (!audioUrl) {
-			toast.error("Sound file not available");
+			toast.error(zh["toast.sound_file_not_available"]);
 			return false;
 		}
 
