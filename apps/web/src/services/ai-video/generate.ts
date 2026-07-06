@@ -384,62 +384,50 @@ async function callFalAI(options: VideoGenOptions): Promise<VideoGenResult> {
   throw new Error("fal.ai 生成超时（超过 5 分钟）");
 }
 
-// ===== 主入口：Replicate → WaveSpeedAI → Atlas Cloud → fal.ai =====
+// ===== 主入口：Atlas Cloud → WaveSpeedAI → fal.ai =====
 
 export async function generateVideo(options: VideoGenOptions): Promise<VideoGenResult> {
-  const replicateKey = process.env.NEXT_PUBLIC_REPLICATE_API_KEY;
-  const wavespeedKey = process.env.NEXT_PUBLIC_WAVESPEED_API_KEY;
   const atlasKey = process.env.NEXT_PUBLIC_ATLAS_API_KEY;
+  const wavespeedKey = process.env.NEXT_PUBLIC_WAVESPEED_API_KEY;
   const falKey = process.env.NEXT_PUBLIC_FAL_API_KEY;
 
-  if (!replicateKey && !wavespeedKey && !atlasKey && !falKey) {
+  if (!atlasKey && !wavespeedKey && !falKey) {
     return {
       success: false,
-      error: "未配置 API Key。请在 .env.local 中设置 NEXT_PUBLIC_REPLICATE_API_KEY / WAVESPEED / ATLAS / FAL_API_KEY",
+      error: "未配置任何 API Key。请在 .env.local 中配置",
       provider: "replicate",
     };
   }
 
-  // 第一选择: fal.ai (已验证可用 ✅)
-  if (falKey) {
+  // 第一选择: Atlas Cloud
+  if (atlasKey) {
     try {
-      return await callFalAI(options);
+      return await callAtlasCloud(options);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "未知错误";
-      console.warn("fal.ai 失败，fallback:", msg);
-      options.onProgress?.("fal.ai 失败，切换 Replicate...");
+      console.warn("Atlas Cloud 失败，fallback:", msg);
+      options.onProgress?.("Atlas Cloud 失败，切换 WaveSpeedAI...");
     }
   }
 
-  // 第二选择: Replicate ($0.08/s 最便宜)
-  if (replicateKey) {
-    try {
-      return await callReplicate(options);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "未知错误";
-      console.warn("Replicate 失败，fallback:", msg);
-      options.onProgress?.("Replicate 失败，切换 WaveSpeedAI...");
-    }
-  }
-
-  // 第三选择: WaveSpeedAI
+  // 第二选择: WaveSpeedAI
   if (wavespeedKey) {
     try {
       return await callWaveSpeedAI(options);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "未知错误";
       console.warn("WaveSpeedAI 失败，fallback:", msg);
-      options.onProgress?.("WaveSpeedAI 失败，切换 Atlas Cloud...");
+      options.onProgress?.("WaveSpeedAI 失败，切换 fal.ai...");
     }
   }
 
-  // 最后兜底: Atlas Cloud
-  if (atlasKey) {
+  // 最后兜底: fal.ai
+  if (falKey) {
     try {
-      return await callAtlasCloud(options);
+      return await callFalAI(options);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "未知错误";
-      return { success: false, error: `所有提供商均失败。Atlas: ${msg}`, provider: "atlas" };
+      return { success: false, error: `所有提供商均失败。fal.ai: ${msg}`, provider: "fal" };
     }
   }
 
