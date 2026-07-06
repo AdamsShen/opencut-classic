@@ -21,14 +21,26 @@ function sleep(ms: number): Promise<void> {
 
 function extractAudioUrl(payload: Record<string, unknown>): string | null {
   // fal.ai musicgen 返回 { audio_url: { url: "..." } }
-  const audioUrl =
-    (payload.audio_url as { url?: string })?.url ||
-    payload.audio_url;
-  if (typeof audioUrl === "string" && audioUrl.startsWith("http")) return audioUrl;
+  const audioUrlObj = payload.audio_url;
+  if (
+    audioUrlObj &&
+    typeof audioUrlObj === "object" &&
+    "url" in audioUrlObj &&
+    typeof (audioUrlObj as Record<string, unknown>).url === "string"
+  ) {
+    const url = (audioUrlObj as Record<string, unknown>).url as string;
+    if (url.startsWith("http")) return url;
+  }
+
+  // audio_url 直接是字符串
+  if (typeof audioUrlObj === "string" && audioUrlObj.startsWith("http")) return audioUrlObj;
 
   // audio 对象
-  const audio = (payload.audio as { url?: string }) || {};
-  if (audio.url && audio.url.startsWith("http")) return audio.url;
+  const audio = payload.audio;
+  if (audio && typeof audio === "object" && "url" in audio && typeof (audio as Record<string, unknown>).url === "string") {
+    const url = (audio as Record<string, unknown>).url as string;
+    if (url.startsWith("http")) return url;
+  }
 
   // 通用降级
   const output = payload.output;
