@@ -63,17 +63,16 @@ function TimecodeDisplay() {
 	const editor = useEditor();
 	const totalDuration = useEditor((e) => e.timeline.getTotalDuration());
 	const fps = useEditor((e) => e.project.getActive().settings.fps);
-	const [currentTime, setCurrentTime] = useState<MediaTime>(() =>
-		editor.playback.getCurrentTime(),
+	const [currentTime, setCurrentTime] = useState<MediaTime>(
+		() => editor.playback.getCurrentTime(),
 	);
 
 	useEffect(() => {
-		const unsubscribeUpdate = editor.playback.onUpdate(
-			(time: MediaTime) => { if (time != null) setCurrentTime(time); },
-		);
-		const unsubscribeSeek = editor.playback.onSeek(
-			(time: MediaTime) => { if (time != null) setCurrentTime(time); },
-		);
+		const onTime = (time: MediaTime) => {
+			if (time != null && Number.isFinite(time)) setCurrentTime(time);
+		};
+		const unsubscribeUpdate = editor.playback.onUpdate(onTime);
+		const unsubscribeSeek = editor.playback.onSeek(onTime);
 		return () => {
 			unsubscribeUpdate();
 			unsubscribeSeek();
