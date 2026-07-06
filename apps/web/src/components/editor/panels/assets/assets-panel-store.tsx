@@ -81,6 +81,10 @@ export const tabs = {
 		icon: createHugeiconsIcon({ icon: MagicWand05Icon }),
 		label: zh["tab.ai_tools"],
 	},
+	"ai-audio": {
+		icon: createHugeiconsIcon({ icon: MusicNote01Icon }),
+		label: zh["tab.ai_audio"],
+	},
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),
 		label: zh["tab.settings"],
