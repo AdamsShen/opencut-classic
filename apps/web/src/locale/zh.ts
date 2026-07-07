@@ -12,6 +12,7 @@ export const zh = {
   "tab.ai_video": "AI 视频",
   "tab.ai_tools": "AI 工具",
   "tab.ai_audio": "AI 音频",
+  "tab.ai_image": "AI 图片",
 
   // ===== 导航 =====
   "nav.roadmap": "路线图",
@@ -174,6 +175,29 @@ export const zh = {
   "ai_tools.uploading": "上传图片...",
   "ai_tools.success": "处理完成，已加入素材库",
   "ai_tools.failed": "处理失败",
+
+  // ===== AI 图片生成 =====
+  "ai_image.title": "AI 图片",
+  "ai_image.prompt_label": "图片描述",
+  "ai_image.prompt_placeholder": "描述你想生成的图片，例如：一只柴犬在樱花树下奔跑，吉卜力风格插画",
+  "ai_image.negative_prompt_label": "排除内容",
+  "ai_image.negative_prompt_optional": "（可选）",
+  "ai_image.negative_prompt_placeholder": "不想出现的内容，例如：模糊, 低画质, 畸形手指",
+  "ai_image.model": "模型",
+  "ai_image.aspect_ratio": "画面比例",
+  "ai_image.num_images": "生成数量",
+  "ai_image.square": "1:1 正方形 (1024×1024)",
+  "ai_image.landscape_16_9": "16:9 横版 (1344×768)",
+  "ai_image.portrait_9_16": "9:16 竖版 (768×1344)",
+  "ai_image.landscape_3_2": "3:2 横版 (1216×832)",
+  "ai_image.generate": "生成图片",
+  "ai_image.generating": "生成中...",
+  "ai_image.processing": "处理中...",
+  "ai_image.success": "{count} 张图片已生成，已加入素材库",
+  "ai_image.failed": "图片生成失败",
+  "ai_image.hint": "主：Atlas Cloud flux-2-pro → 备：WaveSpeedAI flux-2-pro → 兜底：fal.ai flux-2-pro。结果自动加入素材库。",
+  "ai_image.no_prompt": "请输入图片描述",
+  "ai_image.no_project": "请先打开或创建一个项目",
 
   // ===== 通用 =====
   "common.loading": "加载中...",

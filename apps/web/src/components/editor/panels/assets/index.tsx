@@ -12,6 +12,7 @@ import { StickersView } from "@/stickers/components/assets-view";
 import { TextView } from "@/text/components/assets-view";
 import { EffectsView } from "@/effects/components/assets-view";
 import { AIVideoView } from "./views/ai-video";
+import { AIImageView } from "./views/ai-image";
 import { AIToolsView } from "./views/ai-tools";
 import { AIAudioView } from "./views/ai-audio";
 
@@ -36,6 +37,7 @@ export function AssetsPanel() {
 			</div>
 		),
 		"ai-video": <AIVideoView />,
+		"ai-image": <AIImageView />,
 		"ai-tools": <AIToolsView />,
 		"ai-audio": <AIAudioView />,
 		settings: <SettingsView />,

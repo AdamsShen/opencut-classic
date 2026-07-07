@@ -7,6 +7,7 @@ import {
 	Folder03Icon,
 	Happy01Icon,
 	HeadphonesIcon,
+	ImageAdd02Icon,
 	MagicWand05Icon,
 	MusicNote01Icon,
 	TextIcon,
@@ -27,6 +28,7 @@ export const TAB_KEYS = [
 	"captions",
 	"adjustment",
 	"ai-video",
+	"ai-image",
 	"ai-tools",
 	"ai-audio",
 	"settings",
@@ -76,6 +78,10 @@ export const tabs = {
 	"ai-video": {
 		icon: createHugeiconsIcon({ icon: Video02Icon }),
 		label: zh["tab.ai_video"],
+	},
+	"ai-image": {
+		icon: createHugeiconsIcon({ icon: ImageAdd02Icon }),
+		label: zh["tab.ai_image"],
 	},
 	"ai-tools": {
 		icon: createHugeiconsIcon({ icon: MagicWand05Icon }),

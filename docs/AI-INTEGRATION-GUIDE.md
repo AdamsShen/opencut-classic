@@ -13,9 +13,10 @@
 - [3. 分步实施计划](#3-分步实施计划)
   - [第一步：前端界面中文化](#第一步前端界面中文化)
   - [第二步：Seedance 2.0 文生视频集成](#第二步seedance-20-文生视频集成)
-  - [第三步：AI 智能擦除 + 抠像集成](#第三步ai-智能擦除--抠像集成)
-  - [第四步：完善智能字幕功能](#第四步完善智能字幕功能)
-  - [第五步：AI 音乐/音效生成](#第五步ai-音乐音效生成)
+  - [第三步：AI 文生图集成](#第三步ai-文生图集成)
+  - [第四步：AI 智能擦除 + 抠像集成](#第四步ai-智能擦除--抠像集成)
+  - [第五步：完善智能字幕功能](#第五步完善智能字幕功能)
+  - [第六步：AI 音乐/音效生成](#第六步ai-音乐音效生成)
 - [4. 各步骤依赖关系](#4-各步骤依赖关系)
 - [5. 完成后的功能对比](#5-完成后的功能对比)
 
@@ -146,7 +147,7 @@ interface MediaAsset {
 
 ## 3. 分步实施计划
 
-> 第一步 ✅ 已完成 ｜ 第二步 ✅ 已完成 ｜ 第三步 ⏳ 待实施 ｜ 第四步 ⏳ 待实施 ｜ 第五步 ⏳ 待实施
+> 第一步 ✅ 已完成 ｜ 第二步 ✅ 已完成 ｜ 第三步 ⏳ 待实施 ｜ 第四步 ⏳ 待实施 ｜ 第五步 ⏳ 待实施 ｜ 第六步 ⏳ 待实施
 
 ### 第一步：前端界面中文化
 
@@ -591,7 +592,448 @@ const result = await response.json()
 
 ---
 
-### 第三步：AI 智能擦除 + 抠像集成
+### 第三步：AI 文生图集成
+
+**目标**：编辑器内根据文字描述生成高质量图片，结果自动加入图片素材库。
+
+**方案**：新增 AI Image 标签页 → Atlas Cloud / WaveSpeedAI API（复用第二步的 API Key 和架构模式）→ 结果写入 MediaManager。
+
+**依赖**：无强依赖，API 层可复用第二步的 fetch 模式。
+
+**改动量**：2-3 天
+
+#### 可用的文生图模型
+
+| 渠道 | 模型 | 说明 |
+|------|------|------|
+| WaveSpeedAI | `flux-1.1-pro` | Flux 系列，写实/艺术风格均可，速度快 |
+| WaveSpeedAI | `stable-diffusion-3.5` | SD 3.5，社区生态成熟，风格多样 |
+| Atlas Cloud | `flux-pro` | Flux Pro，高画质，适合精细图像 |
+| Atlas Cloud | `sdxl-lightning` | SDXL Lightning，4 步出图，极速生成 |
+
+推荐默认使用 WaveSpeedAI 的 `flux-1.1-pro`（与第二步共享 API Key）。
+
+#### 实施步骤
+
+**Step 3.1** — 注册 AI Image 标签
+
+在 `apps/web/src/components/editor/panels/assets/assets-panel-store.tsx`：
+
+```ts
+// 1. TAB_KEYS 中新增
+export const TAB_KEYS = [
+  "media",
+  "sounds",
+  "text",
+  "stickers",
+  "effects",
+  "transitions",
+  "captions",
+  "adjustment",
+  "ai-video",
+  "ai-image",    // 新增
+  "settings",
+] as const
+
+// 2. 添加图标
+import { ImageAdd02Icon } from "@hugeicons/core-free-icons"  // 新增
+
+// 3. tabs 对象中新增
+export const tabs = {
+  // ... 原有内容不变 ...
+  "ai-image": {
+    icon: createHugeiconsIcon({ icon: ImageAdd02Icon }),
+    label: zh["tab.ai_image"],   // "AI 图片"
+  },
+  // ...
+}
+```
+
+中文文案同步在 `zh.ts` 中加入：
+
+```ts
+"tab.ai_image": "AI 图片",
+```
+
+**Step 3.2** — 在 viewMap 中注册组件
+
+修改 `apps/web/src/components/editor/panels/assets/index.tsx`：
+
+```tsx
+import { AIImageView } from "./views/ai-image"
+
+export function AssetsPanel() {
+  const viewMap: Record<Tab, React.ReactNode> = {
+    // ... 原有内容不变 ...
+    "ai-image": <AIImageView />,
+    // ...
+  }
+}
+```
+
+**Step 3.3** — 创建 AI 文生图服务
+
+新建 `apps/web/src/services/ai-image/generate.ts`：
+
+```ts
+"use client"
+
+const WAVESPEED_API_BASE = "https://api.wavespeed.ai/v1"
+
+interface ImageGenerationInput {
+  prompt: string
+  negativePrompt?: string
+  model?: string           // 默认 "flux-1.1-pro"
+  width?: number           // 默认 1024
+  height?: number          // 默认 1024
+  numImages?: number       // 默认 1，最多 4
+  seed?: number            // 可选，用于复现结果
+}
+
+interface ImageGenerationResult {
+  images: Array<{
+    url: string
+    width: number
+    height: number
+  }>
+}
+
+export async function generateImage(
+  input: ImageGenerationInput
+): Promise<ImageGenerationResult> {
+  const apiKey = process.env.NEXT_PUBLIC_WAVESPEED_API_KEY
+  if (!apiKey) throw new Error("WAVESPEED_API_KEY 未配置")
+
+  const {
+    prompt,
+    negativePrompt = "",
+    model = "flux-1.1-pro",
+    width = 1024,
+    height = 1024,
+    numImages = 1,
+    seed,
+  } = input
+
+  // 提交生成任务
+  const submitRes = await fetch(`${WAVESPEED_API_BASE}/images/generations`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      prompt,
+      negative_prompt: negativePrompt,
+      width,
+      height,
+      num_images: numImages,
+      seed,
+    }),
+  })
+
+  if (!submitRes.ok) {
+    const err = await submitRes.json().catch(() => ({}))
+    throw new Error(err.message || `API 请求失败: ${submitRes.status}`)
+  }
+
+  const data = await submitRes.json()
+
+  // WaveSpeedAI 图像 API 通常同步返回结果
+  // 如果是异步的，需要增加轮询逻辑（参考 ai-video/generate.ts）
+  if (data.status === "processing") {
+    return await pollImageResult(data.task_id, apiKey)
+  }
+
+  return {
+    images: data.images || data.data || [],
+  }
+}
+
+async function pollImageResult(
+  taskId: string,
+  apiKey: string,
+  maxRetries = 60,
+  intervalMs = 2000
+): Promise<ImageGenerationResult> {
+  for (let i = 0; i < maxRetries; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs))
+    const res = await fetch(`${WAVESPEED_API_BASE}/tasks/${taskId}`, {
+      headers: { "Authorization": `Bearer ${apiKey}` },
+    })
+    const data = await res.json()
+    if (data.status === "completed") {
+      return { images: data.images || data.data || [] }
+    }
+    if (data.status === "failed") {
+      throw new Error(data.error || "图片生成失败")
+    }
+  }
+  throw new Error("图片生成超时")
+}
+```
+
+**Step 3.4** — 创建 AI Image UI 组件
+
+新建 `apps/web/src/components/editor/panels/assets/views/ai-image.tsx`：
+
+```tsx
+"use client"
+
+import { useState } from "react"
+import { PanelView } from "./base-panel"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
+import { useEditor } from "@/editor/use-editor"
+import { generateImage } from "@/services/ai-image/generate"
+import { zh } from "@/locale/zh"
+
+const MODEL_OPTIONS = [
+  { value: "flux-1.1-pro", label: "Flux 1.1 Pro（推荐）" },
+  { value: "stable-diffusion-3.5", label: "Stable Diffusion 3.5" },
+  { value: "sdxl-lightning", label: "SDXL Lightning（极速）" },
+]
+
+const SIZE_OPTIONS = [
+  { value: "1024x1024", label: "1:1 正方形 (1024×1024)" },
+  { value: "1344x768", label: "16:9 横版 (1344×768)" },
+  { value: "768x1344", label: "9:16 竖版 (768×1344)" },
+  { value: "1216x832", label: "3:2 横版 (1216×832)" },
+]
+
+function parseSize(size: string): { width: number; height: number } {
+  const [w, h] = size.split("x").map(Number)
+  return { width: w, height: h }
+}
+
+export function AIImageView() {
+  const editor = useEditor()
+  const activeProject = useEditor((e) => e.project.getActive())
+
+  const [prompt, setPrompt] = useState("")
+  const [negativePrompt, setNegativePrompt] = useState("")
+  const [model, setModel] = useState("flux-1.1-pro")
+  const [size, setSize] = useState("1024x1024")
+  const [numImages, setNumImages] = useState(1)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [progress, setProgress] = useState("")
+  const [generatedImages, setGeneratedImages] = useState<string[]>([])
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast.error("请输入图片描述")
+      return
+    }
+    if (!activeProject) {
+      toast.error(zh["toast.no_active_project"])
+      return
+    }
+
+    setIsGenerating(true)
+    setProgress("生成中...")
+    setGeneratedImages([])
+
+    try {
+      const { width, height } = parseSize(size)
+      const result = await generateImage({
+        prompt: prompt.trim(),
+        negativePrompt: negativePrompt.trim() || undefined,
+        model,
+        width,
+        height,
+        numImages,
+      })
+
+      setProgress("下载图片...")
+
+      // 将生成的图片逐个加入素材库
+      for (const image of result.images) {
+        const response = await fetch(image.url)
+        const blob = await response.blob()
+        const ext = blob.type === "image/png" ? "png" : "jpg"
+        const file = new File(
+          [blob],
+          `ai-image-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`,
+          { type: blob.type }
+        )
+
+        await editor.media.addMediaAsset({
+          projectId: activeProject.metadata.id,
+          asset: { file, type: "image" },
+        })
+      }
+
+      // 显示预览
+      setGeneratedImages(result.images.map((img) => img.url))
+
+      toast.success(`${result.images.length} 张图片已生成，已加入素材库`)
+      // 不清空 prompt，方便用户迭代
+    } catch (error) {
+      console.error("Image generation failed:", error)
+      toast.error("图片生成失败", {
+        description:
+          error instanceof Error ? error.message : zh["toast.please_try_again"],
+      })
+    } finally {
+      setIsGenerating(false)
+      setProgress("")
+    }
+  }
+
+  return (
+    <PanelView title={zh["tab.ai_image"]}>
+      <div className="flex flex-col gap-4 p-3">
+        {/* Prompt 输入 */}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="ai-image-prompt">图片描述</Label>
+          <textarea
+            id="ai-image-prompt"
+            className="..."  // 复用现有样式
+            placeholder="描述你想要生成的图片，例如：一只柴犬在樱花树下奔跑，吉卜力风格插画"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+            disabled={isGenerating}
+          />
+        </div>
+
+        {/* 负向 Prompt */}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="ai-image-neg-prompt">
+            排除内容 <span className="text-muted-foreground">（可选）</span>
+          </Label>
+          <textarea
+            id="ai-image-neg-prompt"
+            className="..."
+            placeholder="不想出现的内容，例如：模糊, 低画质, 畸形手指"
+            value={negativePrompt}
+            onChange={(e) => setNegativePrompt(e.target.value)}
+            rows={2}
+            disabled={isGenerating}
+          />
+        </div>
+
+        {/* 模型选择 */}
+        <div className="flex flex-col gap-1.5">
+          <Label>模型</Label>
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="..."
+            disabled={isGenerating}
+          >
+            {MODEL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 画面比例 */}
+        <div className="flex flex-col gap-1.5">
+          <Label>画面比例</Label>
+          <select
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
+            className="..."
+            disabled={isGenerating}
+          >
+            {SIZE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 生成数量 */}
+        <div className="flex flex-col gap-1.5">
+          <Label>生成数量</Label>
+          <select
+            value={numImages}
+            onChange={(e) => setNumImages(Number(e.target.value))}
+            className="..."
+            disabled={isGenerating}
+          >
+            <option value={1}>1 张</option>
+            <option value={2}>2 张</option>
+            <option value={4}>4 张</option>
+          </select>
+        </div>
+
+        {/* 生成按钮 */}
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !prompt.trim()}
+          className="w-full"
+        >
+          {isGenerating ? progress : "生成图片"}
+        </Button>
+
+        {/* 生成预览 */}
+        {generatedImages.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {generatedImages.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`生成图片 ${idx + 1}`}
+                className="rounded-md border object-cover aspect-square"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* 提示信息 */}
+        <p className="text-muted-foreground text-xs">
+          基于 Flux / Stable Diffusion 模型，通过 WaveSpeedAI 调用。
+          约 $0.002–0.01/张。
+        </p>
+      </div>
+    </PanelView>
+  )
+}
+```
+
+**Step 3.5** — 验证
+
+```bash
+cd /Users/xmly/opencut-classic
+# 确保 .env.local 中 NEXT_PUBLIC_WAVESPEED_API_KEY 已设置
+bun dev:web
+```
+
+1. 打开编辑器 → 左侧面板出现 "AI 图片" 标签
+2. 输入 prompt → 选择模型/比例/数量 → 点击生成
+3. 等待数秒至数十秒 → 图片自动加入素材库
+4. 在素材库中查看生成的图片，拖入时间轴使用
+
+#### 备用方案：Atlas Cloud API
+
+如果要用 Atlas Cloud 替代（部分模型更稳定）：
+
+```ts
+const ATLAS_API_BASE = "https://api.atlas.cloud/v1"
+const ATLAS_API_KEY = process.env.NEXT_PUBLIC_ATLAS_API_KEY
+
+// Atlas Cloud 的图像生成端点
+const response = await fetch(`${ATLAS_API_BASE}/images/generations`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${ATLAS_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "flux-pro",       // 或 "sdxl-lightning"
+    prompt,
+    width,
+    height,
+    num_images: numImages,
+  }),
+})
+```
+
+---
+
+### 第四步：AI 智能擦除 + 抠像集成
 
 **目标**：选中图片后，涂鸦标记要擦除的区域或一键抠像。
 
@@ -603,7 +1045,7 @@ const result = await response.json()
 
 #### 实施步骤
 
-**Step 3.1** — 注册 AI Tools 标签
+**Step 4.1** — 注册 AI Tools 标签
 
 在 `assets-panel-store.tsx` 中新增：
 
@@ -617,14 +1059,14 @@ const result = await response.json()
 }
 ```
 
-**Step 3.2** — 创建 AI Tools 组件
+**Step 4.2** — 创建 AI Tools 组件
 
 功能分区：
 - **AI 擦除**：选图 → 涂鸦遮罩 Canvas → fal.ai Inpainting API → 返回结果
 - **AI 抠像**：选图 → fal.ai RemoveBG API → 透明背景结果
 - **AI 扩图**：选图 → fal.ai Outpainting API → 扩展画面
 
-**Step 3.3** — 涂鸦遮罩 Canvas
+**Step 4.3** — 涂鸦遮罩 Canvas
 
 这个功能需要实现一个简单的 Canvas 涂鸦工具，复杂度最大。如果不想做，可以降级为：
 - 用 `IOPaint` 本地服务（`pip install iopaint` → `localhost:8080`）代替
@@ -632,7 +1074,7 @@ const result = await response.json()
 
 ---
 
-### 第四步：完善智能字幕功能
+### 第五步：完善智能字幕功能
 
 **目标**：确认并完善已有的语音转文字/自动字幕能力。
 
@@ -642,7 +1084,7 @@ const result = await response.json()
 
 #### 实施步骤
 
-**Step 4.1** — 功能审计
+**Step 5.1** — 功能审计
 
 ```bash
 # 检查 TranscriptionService 实现完整度
@@ -660,7 +1102,7 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 - [ ] 字幕样式自定义（字体/颜色/大小/位置）
 - [ ] 字幕导出（SRT/VTT）
 
-**Step 4.2** — 补齐缺失能力
+**Step 5.2** — 补齐缺失能力
 
 根据审计结果决定是否：
 - 升级 Whisper 模型版本
@@ -669,7 +1111,7 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 
 ---
 
-### 第五步：AI 音乐/音效生成
+### 第六步：AI 音乐/音效生成
 
 **目标**：编辑器内根据 prompt 生成背景音乐或音效。
 
@@ -679,7 +1121,7 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 
 #### 实施步骤
 
-**Step 5.1** — 选择模型
+**Step 6.1** — 选择模型
 
 | 渠道 | 模型 | 说明 |
 |------|------|------|
@@ -689,7 +1131,7 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 
 推荐使用 fal.ai（统一 API Key）。
 
-**Step 5.2** — 类似 AIVideoView 的实现模式
+**Step 6.2** — 类似 AIVideoView 的实现模式
 
 - Prompt 输入框
 - 类型选择（背景音乐 / 音效）
@@ -706,18 +1148,22 @@ cat apps/web/src/subtitles/components/assets-view.tsx
     │
     ├── 第二步（文生视频），不依赖第一步，可并行
     │      │
-    │      └── 依赖：FAL_KEY 环境变量
+    │      └── 依赖：NEXT_PUBLIC_WAVESPEED_API_KEY 环境变量
     │
-    ├── 第三步（擦除+抠像），不依赖前面，可并行
+    ├── 第三步（文生图），不依赖前面，可并行
     │      │
-    │      └── 依赖：@fal-ai/client（第二步会安装）
+    │      └── 依赖：复用第二步 API Key，架构模式一致
     │
-    ├── 第四步（字幕完善），独立，任何时候做
+    ├── 第四步（擦除+抠像），不依赖前面，可并行
+    │      │
+    │      └── 依赖：@fal-ai/client 或复用 fetch 模式
     │
-    └── 第五步（AI 音乐），不依赖前面，可并行
+    ├── 第五步（字幕完善），独立，任何时候做
+    │
+    └── 第六步（AI 音乐），不依赖前面，可并行
 
-推荐执行顺序：第一步 → 第二步 → 第五步 → 第三步 → 第四步
-                  (先给UI中文 再快赢文生视频 再音频 再抠像 最后字幕)
+推荐执行顺序：第一步 → 第二步 → 第三步 → 第六步 → 第四步 → 第五步
+                  (先给UI中文 再文生视频 再文生图 再音频 再抠像 最后字幕)
 ```
 
 ---
@@ -728,7 +1174,7 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 |------|:--:|:--:|:--:|
 | 文生视频 | ✅ | ❌ | ✅ Seedance 2.0 |
 | 图生视频 | ✅ | ❌ | ✅ Seedance 2.0 I2V |
-| 文生图 | ✅ | ❌ | ⚠️ 可扩展 |
+| 文生图 | ✅ | ❌ | ✅ Flux/SD |
 | 智能字幕 | ✅ | ⚠️ 待验证 | ✅ Whisper |
 | AI 配音 (TTS) | ✅ | ❌ | ⚠️ 待扩展 |
 | 智能抠像 | ✅ VIP | ❌ | ✅ RemoveBG API |
@@ -738,4 +1184,4 @@ cat apps/web/src/subtitles/components/assets-view.tsx
 | AI 音乐 | ✅ | ❌ | ✅ MusicGen API |
 | 中文界面 | ✅ | ❌ | ✅ 第一步完成后 |
 
-**覆盖度**：0% → 约 70%（10 项中覆盖 7 项，超清修复因技术限制无法集成）
+**覆盖度**：0% → 约 80%（11 项中覆盖 8 项，超清修复因技术限制无法集成）
