@@ -1,0 +1,22 @@
+{
+  "name": "@opencut/mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenCut Classic MCP Server — 将编辑器能力暴露为 MCP 工具，支持自然语言操控视频编辑",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
