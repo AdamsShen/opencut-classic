@@ -88,7 +88,16 @@ class WasmCompositor {
 	}
 
 	render(frame: FrameDescriptor) {
-		renderFrame(frame);
+		// 补全 Rust compositor 反序列化需要的 effectPassGroups 字段
+		const safeFrame = {
+			...frame,
+			items: frame.items.map((item) =>
+				item.type === "sceneEffect"
+					? { ...item, effectPassGroups: item.effectPassGroups ?? [] }
+					: item,
+			),
+		};
+		renderFrame(safeFrame as FrameDescriptor);
 		if (isRenderPerfEnabled()) {
 			recordWasmFrameProfile(
 				getLastFrameProfile() as Array<{ name: string; durationMs: number }>,
