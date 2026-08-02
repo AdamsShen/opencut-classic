@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/resizable";
 import { AssetsPanel } from "@/components/editor/panels/assets";
 import { PropertiesPanel } from "@/components/editor/panels/properties";
+import { AgentPanel } from "@/components/editor/panels/agent/AgentPanel";
+import { useAgentPanelStore } from "@/components/editor/panels/agent/agent-panel-store";
 import { Timeline } from "@/timeline/components";
 import { PreviewPanel } from "@/preview/components";
 import { EditorHeader } from "@/components/editor/editor-header";
@@ -81,6 +83,8 @@ function DegradedRendererBanner() {
 function EditorLayout() {
 	usePasteMedia();
 	const { panels, setPanel } = usePanelStore();
+	const isAgentPanelOpen = useAgentPanelStore((s) => s.isOpen);
+	const closeAgentPanel = useAgentPanelStore((s) => s.close);
 	const activeScene = useEditor((editor) =>
 		editor.scenes.getActiveSceneOrNull(),
 	);
@@ -191,6 +195,20 @@ function EditorLayout() {
 					>
 						<PropertiesPanel />
 					</ResizablePanel>
+
+					{isAgentPanelOpen && (
+						<>
+							<ResizableHandle withHandle />
+							<ResizablePanel
+								defaultSize={panels.properties}
+								minSize={15}
+								maxSize={40}
+								className="min-w-0"
+							>
+								<AgentPanel onClose={closeAgentPanel} />
+							</ResizablePanel>
+						</>
+					)}
 				</ResizablePanelGroup>
 			</ResizablePanel>
 

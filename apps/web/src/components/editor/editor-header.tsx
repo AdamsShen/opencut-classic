@@ -22,13 +22,17 @@ import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { SOCIAL_LINKS } from "@/site/social";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
-import { CommandIcon, Logout05Icon } from "@hugeicons/core-free-icons";
+import { CommandIcon, Logout05Icon, AiBrain01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ShortcutsDialog } from "@/actions/components/shortcuts-dialog";
 import Image from "next/image";
 import { cn } from "@/utils/ui";
+import { useAgentPanelStore } from "./panels/agent/agent-panel-store";
 
 export function EditorHeader() {
+	const toggleAgentPanel = useAgentPanelStore((s) => s.toggle);
+	const isAgentPanelOpen = useAgentPanelStore((s) => s.isOpen);
+
 	return (
 		<header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
 			<div className="flex items-center gap-1">
@@ -36,6 +40,17 @@ export function EditorHeader() {
 				<EditableProjectName />
 			</div>
 			<nav className="flex items-center gap-2">
+				<button
+					onClick={toggleAgentPanel}
+					className={cn(
+						"rounded px-2 py-1 text-xs flex items-center gap-1 transition-colors",
+						isAgentPanelOpen ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground",
+					)}
+					title="AI 助手"
+				>
+					<HugeiconsIcon icon={AiBrain01Icon} className="size-3.5" />
+					<span className="hidden sm:inline">AI</span>
+				</button>
 				<FeedbackPopover />
 				<ExportButton />
 				<ThemeToggle />
