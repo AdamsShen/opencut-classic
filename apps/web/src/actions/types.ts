@@ -1,5 +1,5 @@
 import type { MutableRefObject } from "react";
-import type { TAction } from "./definitions";
+import { ACTIONS, type TAction } from "./definitions";
 
 export type { TAction };
 
@@ -42,3 +42,24 @@ export type TActionHandlerOptions =
 	| MutableRefObject<boolean>
 	| boolean
 	| undefined;
+
+/**
+ * 需要必传参数的 action 名称集合。
+ * 不在该集合中的 action 均属于 TActionWithOptionalArgs（无需参数或参数可选）。
+ */
+const REQUIRED_ARGS_ACTIONS: ReadonlySet<string> = new Set<string>([
+	"remove-media-asset",
+	"remove-media-assets",
+]);
+
+/**
+ * 运行时校验一个字符串是否为合法的 TActionWithOptionalArgs。
+ * 用于反序列化 / 导入数据的合法性校验。
+ */
+export function isActionWithOptionalArgs(value: unknown): value is TActionWithOptionalArgs {
+	return (
+		typeof value === "string" &&
+		value in ACTIONS &&
+		!REQUIRED_ARGS_ACTIONS.has(value)
+	);
+}
