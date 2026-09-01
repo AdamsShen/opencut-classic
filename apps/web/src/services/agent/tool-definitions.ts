@@ -14,6 +14,7 @@
  */
 
 import { EditorCore } from "@/core";
+import { roundMediaTime } from "@/wasm";
 import type { ToolDefinition } from "./types";
 
 export const TOOL_DEFINITIONS: ToolDefinition[] = [
@@ -154,6 +155,9 @@ function makeFn(
 
 const fps = 30; // OpenCut 默认帧率
 
+/** 将秒数转换为 MediaTime（整数 tick） */
+const toTicks = (seconds: number) => roundMediaTime({ time: seconds * fps });
+
 export function executeTool(name: string, args: Record<string, unknown>): unknown {
   const editor = EditorCore.getInstance();
   const id = args.id as string; // 统一用 id，替代之前的 elementId
@@ -219,7 +223,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       if (!tid) return { error: `未找到片段 ${id}` };
       const right = editor.timeline.splitElements({
         elements: [{ trackId: tid, elementId: id }],
-        splitTime: (args.splitTime as number) * fps,
+        splitTime: toTicks(args.splitTime as number),
       });
       return { ok: true, rightElements: right };
     }
@@ -227,8 +231,8 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
     case "trim_clip": {
       editor.timeline.updateElementTrim({
         elementId: id,
-        trimStart: args.trimStart !== undefined ? (args.trimStart as number) * fps : undefined,
-        trimEnd: args.trimEnd !== undefined ? (args.trimEnd as number) * fps : undefined,
+        trimStart: args.trimStart !== undefined ? toTicks(args.trimStart as number) : undefined,
+        trimEnd: args.trimEnd !== undefined ? toTicks(args.trimEnd as number) : undefined,
       });
       return { ok: true };
     }
@@ -237,7 +241,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       const tid = findTrack(editor, id);
       if (!tid) return { error: `未找到片段 ${id}` };
       editor.timeline.moveElements({
-        moves: [{ trackId: tid, elementId: id, newStartTime: (args.newStartTime as number) * fps }],
+        moves: [{ trackId: tid, elementId: id, newStartTime: toTicks(args.newStartTime as number) }],
       });
       return { ok: true };
     }
@@ -255,10 +259,10 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       const element: any = {
         id: crypto.randomUUID(),
         assetId: args.assetId,
-        startTime: ((args.startTime as number) ?? 0) * fps,
-        duration: ((args.duration as number) ?? 5) * fps,
-        trimStart: ((args.trimStart as number) ?? 0) * fps,
-        trimEnd: ((args.trimEnd as number) ?? 0) * fps,
+        startTime: toTicks((args.startTime as number) ?? 0),
+        duration: toTicks((args.duration as number) ?? 5),
+        trimStart: toTicks((args.trimStart as number) ?? 0),
+        trimEnd: toTicks((args.trimEnd as number) ?? 0),
       };
       editor.timeline.insertElement({ element, placement: { trackId: scene.tracks.main.id, time: element.startTime } });
       return { ok: true, id: element.id };
@@ -304,7 +308,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       const tid = findTrack(editor, id);
       if (!tid) return { error: `未找到片段 ${id}` };
       editor.timeline.upsertKeyframes({
-        keyframes: [{ trackId: tid, elementId: id, propertyPath: args.propertyPath as string, time: (args.time as number) * fps, value: args.value as number, interpolation: (args.interpolation as any) || "linear" }],
+        keyframes: [{ trackId: tid, elementId: id, propertyPath: args.propertyPath as string, time: toTicks(args.time as number), value: args.value as number, interpolation: (args.interpolation as any) || "linear" }],
       });
       return { ok: true };
     }
@@ -321,7 +325,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
     case "retime_keyframe": {
       const tid = findTrack(editor, id);
       if (!tid) return { error: `未找到片段 ${id}` };
-      editor.timeline.retimeKeyframe({ trackId: tid, elementId: id, propertyPath: args.propertyPath as string, keyframeId: args.keyframeId as string, time: (args.newTime as number) * fps });
+      editor.timeline.retimeKeyframe({ trackId: tid, elementId: id, propertyPath: args.propertyPath as string, keyframeId: args.keyframeId as string, time: toTicks(args.newTime as number) });
       return { ok: true };
     }
 
