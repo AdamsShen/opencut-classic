@@ -5,6 +5,7 @@
  *   - 用户可在设置中切换模型
  */
 
+export type { ModelProvider } from "./types";
 import type { ModelProvider } from "./types";
 
 /** 预定义的模型提供者列表 */
