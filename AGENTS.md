@@ -21,3 +21,17 @@ Each app is a frontend that calls into Rust. Logic is never duplicated between a
 
 - Read components before using them. They may already apply classes, which affects what you need to pass and how to override them.
 
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues，使用 `gh` CLI 操作。参见 `docs/agents/issue-tracker.md`。
+
+### Triage labels
+
+使用五个默认 triage 标签：`needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`、`wontfix`。参见 `docs/agents/triage-labels.md`。
+
+### Domain docs
+
+单上下文布局 — 根级 `CONTEXT.md` + `docs/adr/`。参见 `docs/agents/domain.md`。
+
