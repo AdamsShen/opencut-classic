@@ -15,6 +15,8 @@
 
 import { EditorCore } from "@/core";
 import { roundMediaTime } from "@/wasm";
+import { floatToFrameRate } from "@/fps/utils";
+import type { TProjectSettings } from "@/project/types";
 import type { ToolDefinition } from "./types";
 
 export const TOOL_DEFINITIONS: ToolDefinition[] = [
@@ -241,7 +243,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       const tid = findTrack(editor, id);
       if (!tid) return { error: `未找到片段 ${id}` };
       editor.timeline.moveElements({
-        moves: [{ trackId: tid, elementId: id, newStartTime: toTicks(args.newStartTime as number) }],
+        moves: [{ sourceTrackId: tid, targetTrackId: tid, elementId: id, newStartTime: toTicks(args.newStartTime as number) }],
       });
       return { ok: true };
     }
@@ -249,7 +251,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
     case "update_clip_retime": {
       const tid = findTrack(editor, id);
       if (!tid) return { error: `未找到片段 ${id}` };
-      editor.timeline.updateElementRetime({ trackId: tid, elementId: id, retime: { speed: args.speed as number } });
+      editor.timeline.updateElementRetime({ trackId: tid, elementId: id, retime: { rate: args.speed as number } });
       return { ok: true };
     }
 
@@ -264,7 +266,7 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
         trimStart: toTicks((args.trimStart as number) ?? 0),
         trimEnd: toTicks((args.trimEnd as number) ?? 0),
       };
-      editor.timeline.insertElement({ element, placement: { trackId: scene.tracks.main.id, time: element.startTime } });
+      editor.timeline.insertElement({ element, placement: { mode: "explicit", trackId: scene.tracks.main.id } });
       return { ok: true, id: element.id };
     }
 
@@ -338,18 +340,30 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
     case "get_project_info": {
       const a = editor.project.getActive();
       if (!a) return { error: "没有打开的项目" };
-      return { id: a.id, name: a.metadata?.name, width: a.settings?.width, height: a.settings?.height, fps: a.settings?.fps };
+      return { id: a.metadata.id, name: a.metadata.name, width: a.settings.canvasSize.width, height: a.settings.canvasSize.height, fps: a.settings.fps };
     }
 
-    case "update_project_settings":
-      editor.project.updateProjectSettings({ settings: args });
+    case "update_project_settings": {
+      const active = editor.project.getActive();
+      if (!active) return { error: "没有打开的项目" };
+      const settings: Partial<TProjectSettings> = {};
+      if (args.fps !== undefined) settings.fps = floatToFrameRate(args.fps as number);
+      if (args.width !== undefined || args.height !== undefined) {
+        settings.canvasSize = {
+          width: args.width !== undefined ? (args.width as number) : active.settings.canvasSize.width,
+          height: args.height !== undefined ? (args.height as number) : active.settings.canvasSize.height,
+        };
+      }
+      if (Object.keys(settings).length > 0) editor.project.updateSettings({ settings });
+      if (args.name !== undefined) editor.project.renameProject({ id: active.metadata.id, name: args.name as string });
       return { ok: true };
+    }
 
     // ── 素材 ──
     case "list_media": {
       const a = editor.project.getActive();
       if (!a) return { assets: [] };
-      const assets = (editor.media as any).getAssetsByProject?.({ projectId: a.id }) || [];
+      const assets = (editor.media as any).getAssetsByProject?.({ projectId: a.metadata.id }) || [];
       return { assets: assets.map((x: any) => ({ id: x.id, name: x.name, type: x.type })) };
     }
 
@@ -360,14 +374,14 @@ export function executeTool(name: string, args: Record<string, unknown>): unknow
       const id = crypto.randomUUID();
       const ext = (src.split(".").pop() || "").toLowerCase();
       const type = ["mp4","mov","webm"].includes(ext) ? "video" : ["mp3","wav","aac","flac","m4a"].includes(ext) ? "audio" : "image";
-      (editor.media as any).addMediaAsset?.({ projectId: a.id, asset: { name: (args.name as string) || src, type, source: src } as any });
+      (editor.media as any).addMediaAsset?.({ projectId: a.metadata.id, asset: { name: (args.name as string) || src, type, source: src } as any });
       return { ok: true, assetId: id, type };
     }
 
     case "remove_media": {
       const a = editor.project.getActive();
       if (!a) return { error: "没有打开的项目" };
-      (editor.media as any).removeMediaAssets?.({ projectId: a.id, ids: [args.assetId] });
+      (editor.media as any).removeMediaAssets?.({ projectId: a.metadata.id, ids: [args.assetId] });
       return { ok: true };
     }
 

@@ -229,7 +229,7 @@ async function falGenerate(data: Record<string, unknown>): Promise<string> {
   return json.status_url || `${FAL_BASE}/bytedance/seedance-2.0/requests/${json.request_id}/status`;
 }
 
-async function falPoll(statusUrl: string): Promise<{ status: string; video?: { url?: string } }> {
+async function falPoll(statusUrl: string): Promise<{ status: string; video?: { url?: string }; request_id?: string }> {
   const apiKey = process.env.NEXT_PUBLIC_FAL_API_KEY || "";
   const url = statusUrl.startsWith("http") ? statusUrl : `${FAL_BASE}${statusUrl}`;
 

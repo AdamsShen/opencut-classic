@@ -97,8 +97,8 @@ export class TimelineManager {
 		pushHistory = true,
 	}: {
 		elementId: string;
-		trimStart: MediaTime;
-		trimEnd: MediaTime;
+		trimStart?: MediaTime;
+		trimEnd?: MediaTime;
 		startTime?: MediaTime;
 		duration?: MediaTime;
 		pushHistory?: boolean;
@@ -108,10 +108,13 @@ export class TimelineManager {
 			return;
 		}
 
-		const nextUpdates: Partial<TimelineElement> = {
-			trimStart,
-			trimEnd,
-		};
+		const nextUpdates: Partial<TimelineElement> = {};
+		if (trimStart !== undefined) {
+			nextUpdates.trimStart = trimStart;
+		}
+		if (trimEnd !== undefined) {
+			nextUpdates.trimEnd = trimEnd;
+		}
 		if (startTime !== undefined) {
 			nextUpdates.startTime = startTime;
 		}

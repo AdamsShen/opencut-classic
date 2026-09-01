@@ -112,7 +112,7 @@ server.registerTool(
 
     // 如果未指定轨道，使用主轨道
     const trackId = args.trackId || scene.tracks.main.id;
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
 
     const timelineElement: any = {
       id: crypto.randomUUID(),
@@ -125,7 +125,7 @@ server.registerTool(
 
     ed.timeline.insertElement({
       element: timelineElement,
-      placement: { trackId, time: timelineElement.startTime },
+      placement: { mode: "explicit", trackId },
     });
 
     return textResult({
@@ -151,7 +151,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
     const rightElements = ed.timeline.splitElements({
       elements: [{ trackId: args.trackId, elementId: args.elementId }],
       splitTime: args.splitTime * fps,
@@ -193,12 +193,12 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
     ed.timeline.moveElements({
       moves: [{
-        trackId: args.fromTrackId,
-        elementId: args.elementId,
+        sourceTrackId: args.fromTrackId,
         targetTrackId: args.toTrackId || args.fromTrackId,
+        elementId: args.elementId,
         newStartTime: args.newStartTime * fps,
       }],
     });
@@ -237,7 +237,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
     ed.timeline.updateElementTrim({
       elementId: args.elementId,
       trimStart: args.trimStart !== undefined ? args.trimStart * fps : undefined,
@@ -262,7 +262,7 @@ server.registerTool(
     ed.timeline.updateElementRetime({
       trackId: args.trackId,
       elementId: args.elementId,
-      retime: { speed: args.speed },
+      retime: { rate: args.speed },
     });
     return textResult({ ok: true, speed: args.speed });
   }
@@ -435,7 +435,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
     ed.timeline.upsertKeyframes({
       keyframes: [{
         trackId: args.trackId,
@@ -490,7 +490,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const fps = args.fps || ed.project.getActive()?.settings.fps || 30;
+    const fps = args.fps ?? normalizeFps(ed.project.getActive()?.settings.fps);
     ed.timeline.retimeKeyframe({
       trackId: args.trackId,
       elementId: args.elementId,
@@ -580,7 +580,7 @@ server.registerTool(
   },
   async () => {
     const ed = await getEditor();
-    const projectId = ed.project.getActive()?.id;
+    const projectId = ed.project.getActive()?.metadata.id;
     if (!projectId) return textResult({ assets: [] });
     const assets = ed.media.getAssetsByProject({ projectId }) || [];
     return textResult({
@@ -608,7 +608,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const projectId = ed.project.getActive()?.id;
+    const projectId = ed.project.getActive()?.metadata.id;
     if (!projectId) return textResult({ error: "没有打开的项目" }, true);
 
     const assetId = crypto.randomUUID();
@@ -634,7 +634,7 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    const projectId = ed.project.getActive()?.id;
+    const projectId = ed.project.getActive()?.metadata.id;
     if (!projectId) return textResult({ error: "没有打开的项目" }, true);
     ed.media.removeMediaAssets({ projectId, ids: [args.assetId] });
     return textResult({ ok: true });
@@ -718,11 +718,11 @@ server.registerTool(
     const active = ed.project.getActive();
     if (!active) return textResult({ error: "没有打开的项目" }, true);
     return textResult({
-      id: active.id,
-      name: active.name,
-      width: active.settings?.width,
-      height: active.settings?.height,
-      fps: active.settings?.fps,
+      id: active.metadata.id,
+      name: active.metadata.name,
+      width: active.settings.canvasSize.width,
+      height: active.settings.canvasSize.height,
+      fps: normalizeFps(active.settings.fps),
       duration: ed.timeline.getTotalDuration(),
     });
   }
@@ -741,7 +741,25 @@ server.registerTool(
   },
   async (args: any) => {
     const ed = await getEditor();
-    ed.project.updateProjectSettings({ settings: args });
+    const active = ed.project.getActive();
+    if (!active) return textResult({ error: "没有打开的项目" }, true);
+
+    const settings: any = {};
+    if (args.fps !== undefined) {
+      settings.fps = { numerator: args.fps, denominator: 1 };
+    }
+    if (args.width !== undefined || args.height !== undefined) {
+      settings.canvasSize = {
+        width: args.width ?? active.settings.canvasSize.width,
+        height: args.height ?? active.settings.canvasSize.height,
+      };
+    }
+    if (Object.keys(settings).length > 0) {
+      await ed.project.updateSettings({ settings });
+    }
+    if (args.name !== undefined) {
+      await ed.project.renameProject({ id: active.metadata.id, name: args.name });
+    }
     return textResult({ ok: true });
   }
 );
@@ -884,6 +902,16 @@ function inferMediaType(source: string): string {
   if (["mp3", "wav", "aac", "flac", "ogg", "m4a"].includes(ext)) return "audio";
   if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) return "image";
   return "unknown";
+}
+
+// 兼容两种帧率表示：旧版为纯数字，新版 FrameRate 为 { numerator, denominator }
+function normalizeFps(fps: any): number {
+  if (typeof fps === "number" && Number.isFinite(fps) && fps > 0) return fps;
+  if (fps && typeof fps === "object") {
+    const value = fps.numerator / fps.denominator;
+    if (Number.isFinite(value) && value > 0) return value;
+  }
+  return 30;
 }
 
 function toolCount(): number {
